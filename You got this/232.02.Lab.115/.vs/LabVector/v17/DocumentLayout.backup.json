@@ -1,10 +1,14 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\jacks\\OneDrive\\Desktop\\You got this\\232.02.Lab.115\\",
+  "WorkspaceRootPath": "C:\\Users\\jacks\\Designing-Data-Structures-\\You got this\\232.02.Lab.115\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{73A7474A-51B7-4287-ADF9-1156215BAD2C}|LabVector.vcxproj|C:\\Users\\jacks\\OneDrive\\Desktop\\You got this\\232.02.Lab.115\\vector.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{73A7474A-51B7-4287-ADF9-1156215BAD2C}|LabVector.vcxproj|C:\\Users\\jacks\\Designing-Data-Structures-\\You got this\\232.02.Lab.115\\vector.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{73A7474A-51B7-4287-ADF9-1156215BAD2C}|LabVector.vcxproj|solutionrelative:vector.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{73A7474A-51B7-4287-ADF9-1156215BAD2C}|LabVector.vcxproj|C:\\Users\\jacks\\Designing-Data-Structures-\\You got this\\232.02.Lab.115\\testVector.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{73A7474A-51B7-4287-ADF9-1156215BAD2C}|LabVector.vcxproj|solutionrelative:testVector.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,17 +18,30 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "testVector.h",
+              "DocumentMoniker": "C:\\Users\\jacks\\Designing-Data-Structures-\\You got this\\232.02.Lab.115\\testVector.h",
+              "RelativeDocumentMoniker": "testVector.h",
+              "ToolTip": "C:\\Users\\jacks\\Designing-Data-Structures-\\You got this\\232.02.Lab.115\\testVector.h",
+              "RelativeToolTip": "testVector.h",
+              "ViewState": "AgIAAF0KAAAAAAAAAAD4v14KAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-01-15T21:34:00.694Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "vector.h",
-              "DocumentMoniker": "C:\\Users\\jacks\\OneDrive\\Desktop\\You got this\\232.02.Lab.115\\vector.h",
+              "DocumentMoniker": "C:\\Users\\jacks\\Designing-Data-Structures-\\You got this\\232.02.Lab.115\\vector.h",
               "RelativeDocumentMoniker": "vector.h",
-              "ToolTip": "C:\\Users\\jacks\\OneDrive\\Desktop\\You got this\\232.02.Lab.115\\vector.h",
+              "ToolTip": "C:\\Users\\jacks\\Designing-Data-Structures-\\You got this\\232.02.Lab.115\\vector.h",
               "RelativeToolTip": "vector.h",
-              "ViewState": "AgIAADYAAAAAAAAAAAD4v7wAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAEgBAAAAAAAAAAAQwFcBAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2026-01-15T05:30:17.122Z",
               "EditorCaption": ""

@@ -62,7 +62,7 @@ public:
    void swap(vector& rhs)
    {
    }
-   vector & operator = (const vector & rhs);
+   vector& operator = (const vector& rhs);
    vector & operator = (vector&& rhs);
 
    //
@@ -71,11 +71,15 @@ public:
    class iterator;
    iterator begin() 
    { 
-      return iterator(); 
+      return iterator(0, *this);
    }
    iterator end() 
    { 
-      return iterator(); 
+      if (numElements == 0)
+      {
+         return iterator();
+      }
+      return iterator(numElements, *this); 
    }
 
    //
@@ -143,12 +147,13 @@ class vector <T, A> ::iterator
    friend class ::TestHash;
 public:
    // constructors, destructors, and assignment operator
-   iterator()                           {  }
-   iterator(T* p)                       {  }
-   iterator(const iterator& rhs)        {  }
-   iterator(size_t index, vector<T>& v) {  }
+   iterator()                       { p = nullptr; }
+   iterator(T* p)                   { this->p = p; }
+   iterator(const iterator& rhs)    { p = rhs.p;}
+   iterator(size_t index, vector<T>& v) { p = &v.data[index]; }
    iterator& operator = (const iterator& rhs)
    {
+      p = rhs.p;
       return *this;
    }
 
@@ -172,7 +177,7 @@ public:
    // postfix increment
    iterator operator ++ (int postfix)
    {
-      ++p;
+      p += 1;
       return *this;
    }
 
@@ -204,8 +209,8 @@ template <typename T, typename A>
 vector <T, A> :: vector(const A & a)
 {
    data = nullptr;
-   numElements = 19;
-   numCapacity = 29;
+   numElements = 0;
+   numCapacity = 0;
 }
 
 
@@ -218,8 +223,8 @@ template <typename T, typename A>
 vector <T, A> :: vector(size_t num, const T & t, const A & a) 
 {
    data = nullptr;
-   numElements = 19;
-   numCapacity = 29;
+   numElements = num;
+   numCapacity = num;
 }
 
 /*****************************************
@@ -243,8 +248,8 @@ template <typename T, typename A>
 vector <T, A> :: vector(size_t num, const A & a) 
 {
    data = nullptr;
-   numElements = 19;
-   numCapacity = 29;
+   numElements = num;
+   numCapacity = num;
 }
 
 /*****************************************
@@ -256,8 +261,8 @@ template <typename T, typename A>
 vector <T, A> :: vector (const vector & rhs) 
 {
    data = nullptr;
-   numElements = 19;
-   numCapacity = 29;
+   numElements = rhs.numElements;
+   numCapacity = rhs.numCapacity;
 }
    
 /*****************************************
@@ -268,8 +273,8 @@ template <typename T, typename A>
 vector <T, A> :: vector (vector && rhs) 
 {
    data = nullptr;
-   numElements = 19;
-   numCapacity = 29;
+   numElements = rhs.numElements;
+   numCapacity = rhs.numCapacity;
 }
 
 /*****************************************
@@ -292,7 +297,7 @@ vector <T, A> :: ~vector()
 template <typename T, typename A>
 void vector <T, A> :: resize(size_t newElements)
 {
-   numElements = 3;
+   numElements = newElements;
 }
 
 template <typename T, typename A>
@@ -312,7 +317,7 @@ void vector <T, A> :: resize(size_t newElements, const T & t)
 template <typename T, typename A>
 void vector <T, A> :: reserve(size_t newCapacity)
 {
-   numCapacity = 99;
+   numCapacity = newCapacity;
 }
 
 /***************************************
@@ -337,7 +342,6 @@ template <typename T, typename A>
 T & vector <T, A> :: operator [] (size_t index)
 {
    return *(new T);
-    
 }
 
 /******************************************
