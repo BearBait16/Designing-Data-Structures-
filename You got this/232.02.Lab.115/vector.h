@@ -234,9 +234,23 @@ vector <T, A> :: vector(size_t num, const T & t, const A & a)
 template <typename T, typename A>
 vector <T, A> :: vector(const std::initializer_list<T> & l, const A & a) 
 {
-   data = nullptr;
-   numElements = 19;
-   numCapacity = 29;
+   // store allocator
+   alloc = a;
+   
+   // set elem and cap
+   numElements = l.size();
+   numCapacity = l.size();
+   
+   // allocate with cap
+   data = alloc.allocate(numCapacity);
+   
+   // add each to list
+   size_t i = 0;
+   for (const T& item : l)
+   {
+      alloc.construct(&data[i], item);
+      ++i;
+   }
 }
 
 /*****************************************
@@ -285,6 +299,12 @@ vector <T, A> :: vector (vector && rhs)
 template <typename T, typename A>
 vector <T, A> :: ~vector()
 {
+//   for (auto it = 0; it < numElements; it++)
+//   {
+//      // destroy
+//      // free
+//   }
+
 }
 
 /***************************************
@@ -329,7 +349,7 @@ void vector <T, A> :: reserve(size_t newCapacity)
 template <typename T, typename A>
 void vector <T, A> :: shrink_to_fit()
 {
-    
+   numCapacity = numElements;
 }
 
 
@@ -341,7 +361,7 @@ void vector <T, A> :: shrink_to_fit()
 template <typename T, typename A>
 T & vector <T, A> :: operator [] (size_t index)
 {
-   return *(new T);
+   return data[index];
 }
 
 /******************************************
@@ -361,7 +381,7 @@ const T & vector <T, A> :: operator [] (size_t index) const
 template <typename T, typename A>
 T & vector <T, A> :: front ()
 {
-   return *(new T);
+   return data[0];
 }
 
 /******************************************
@@ -381,7 +401,7 @@ const T & vector <T, A> :: front () const
 template <typename T, typename A>
 T & vector <T, A> :: back()
 {
-   return *(new T);
+   return data[numElements - 1];
 }
 
 /******************************************
