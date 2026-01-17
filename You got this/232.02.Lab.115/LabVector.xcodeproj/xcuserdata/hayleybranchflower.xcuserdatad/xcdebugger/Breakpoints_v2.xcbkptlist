@@ -14,8 +14,8 @@
             filePath = "vector.h"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "374"
-            endingLineNumber = "374"
+            startingLineNumber = "467"
+            endingLineNumber = "467"
             landmarkName = "operator [](index)"
             landmarkType = "9">
          </BreakpointContent>
