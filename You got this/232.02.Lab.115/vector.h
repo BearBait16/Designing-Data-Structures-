@@ -128,6 +128,11 @@ public:
    }
    void pop_back()
    {
+      if (numElements > 0)
+      {
+         alloc.destroy(&data[numElements - 1]);
+         numElements--;
+      }
    }
    void shrink_to_fit();
 
@@ -424,7 +429,7 @@ void vector <T, A> :: reserve(size_t newCapacity)
    T * newData = alloc.allocate(newCapacity);
    for (auto i = 0; i < numElements; i++)
    {
-      alloc.construct(&newData[i], data[i]); // newData[i] <- move_data(data[i])
+      alloc.construct(&newData[i], std::move(data[i])); // newData[i] <- move_data(data[i])
    }
    
    for (auto i = 0; i < numElements; i++)
@@ -549,15 +554,21 @@ const T & vector <T, A> :: back() const
 template <typename T, typename A>
 void vector <T, A> :: push_back (const T & t)
 {
-
+   if (numElements == numCapacity)
+      reserve(numCapacity == 0 ? 1 : numCapacity * 2);
+   
+   new ((void *)(&data[numElements++])) T(t);
 
 }
 
 template <typename T, typename A>
 void vector <T, A> ::push_back(T && t)
 {
-    
-
+   if (numElements == numCapacity)
+      reserve(numCapacity == 0 ? 1 : numCapacity * 2);
+   
+   new ((void *)(&data[numElements++])) T(std::move(t));
+   
 }
 
 /***************************************
