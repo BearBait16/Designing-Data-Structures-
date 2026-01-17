@@ -239,7 +239,7 @@ vector <T, A> :: vector(const A & a)
  * construct each element, and copy the values over
  ****************************************/
 template <typename T, typename A>
-vector <T, A> :: vector(size_t num, const T & t, const A & a) 
+vector <T, A> :: vector(size_t num, const T & t, const A & a)
 {
    data = nullptr;
    numElements = num;
@@ -359,13 +359,49 @@ vector <T, A> :: ~vector()
 template <typename T, typename A>
 void vector <T, A> :: resize(size_t newElements)
 {
+   if (newElements < numElements)
+   {
+      for (auto i = newElements; i < numElements; i++)
+      {
+         alloc.destroy(&data[i]);
+      }
+   }
+   
+   else if (newElements > numElements)
+   {
+      if (newElements > numCapacity)
+         reserve(newElements);
+      for (auto i = numElements; i < newElements; i++)
+      {
+         alloc.construct(&data[i]);
+      }
+   }
+   
    numElements = newElements;
 }
 
 template <typename T, typename A>
 void vector <T, A> :: resize(size_t newElements, const T & t)
 {
-   numElements = 3;
+   if (newElements < numElements)
+   {
+      for (auto i = newElements; i < numElements; i++)
+      {
+         alloc.destroy(&data[i]);
+      }
+   }
+   
+   else if (newElements > numElements)
+   {
+      if (newElements > numCapacity)
+         reserve(newElements);
+      for (auto i = numElements; i < newElements; i++)
+      {
+         alloc.construct(&data[i], t);
+      }
+   }
+   
+   numElements = newElements;
 }
 
 /***************************************
@@ -433,13 +469,8 @@ void vector <T, A> :: shrink_to_fit()
    {
       newData[i] = data[i];
    }
-   
-//   for (auto i = 0; i < numElements; i++)
-//   {
-//      alloc.destroy(&data[i]);
-//   }
-//   
-   alloc.deallocate(data, numElements);    // delete(data)
+
+   alloc.deallocate(data, numCapacity);    // delete(data)
    
    data = newData;
    numCapacity = numElements;
@@ -519,7 +550,7 @@ template <typename T, typename A>
 void vector <T, A> :: push_back (const T & t)
 {
 
-   
+
 }
 
 template <typename T, typename A>
