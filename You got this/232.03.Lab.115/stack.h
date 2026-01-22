@@ -40,12 +40,12 @@ public:
    // Construct
    //
    
-   stack()                       { container.resize(7); }
-   stack(const stack <T> &  rhs) { container.resize(7); }
-   stack(      stack <T> && rhs) { container.resize(7); }
-   stack(const Container &  rhs) { container.resize(7); }
-   stack(      Container && rhs) { container.resize(7); }
-   ~stack()                      {                      }     
+   stack()                       { container.resize(0);          }
+   stack(const stack <T> &  rhs) { *this = rhs;                  }
+   stack(      stack <T> && rhs) { *this = std::move(rhs);       }
+   stack(const Container &  rhs) { container = rhs;    }
+   stack(      Container && rhs) { container = std::move(rhs); }
+   ~stack()                      {                      }
    
    //
    // Assign
@@ -60,7 +60,7 @@ public:
    }
    void swap(stack <T>& rhs)
    {
-
+      container.swap(rhs.container);
    }
 
    //
@@ -68,8 +68,9 @@ public:
    //
    
    T & top()       
-   { 
-      return *(new T); 
+   {
+      assert(!empty());
+      return container[size() - 1];
    }
    const T & top() const 
    { 
@@ -82,11 +83,11 @@ public:
    
    void push(const T &  t) 
    {  
-   
+      container.push_back(t);
    }
    void push(      T && t) 
    {  
-   
+      
    }
 
    //
@@ -102,8 +103,8 @@ public:
    // Status
    //
    
-   size_t size () const { return 99;   }
-   bool   empty() const { return true; }
+   size_t size () const { return container.size();   }
+   bool   empty() const { return size() == 0; }
    
 private:
    
