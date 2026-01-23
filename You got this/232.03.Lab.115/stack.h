@@ -50,12 +50,20 @@ public:
    //
    // Assign
    //
-   stack <T> & operator = (const stack <T> & rhs)
+   stack<T>& operator=(const stack<T>& rhs)
    {
+      if (this != &rhs)
+      {
+         container = rhs.container;
+      }
       return *this;
    }
    stack <T>& operator = (stack <T> && rhs)
    {
+      if (this != &rhs)
+      {
+         container = std::move(rhs.container);
+      }
       return *this;
    }
    void swap(stack <T>& rhs)
@@ -74,7 +82,8 @@ public:
    }
    const T & top() const 
    { 
-      return *(new T); 
+      assert(!empty());
+      return container[size() - 1];
    }
 
    //
@@ -87,7 +96,7 @@ public:
    }
    void push(      T && t) 
    {  
-      
+      container.push_back(std::move(t));
    }
 
    //
@@ -96,7 +105,8 @@ public:
    
    void pop() 
    {  
-   
+      assert(!empty());
+      container.pop_back();
    }
 
    //

@@ -78,7 +78,7 @@ public:
       test_pushMove_standardList();
 
       // Delete
-
+      test_pop();
 
       // Status
       test_size_empty();
@@ -1496,7 +1496,12 @@ public:
    /***************************************
     * POP
     ***************************************/
+   void test_pop()
+   {
+      assertUnit(false == true);
+   }
 
+   // Should maybe do a test for if the container is empty as well
 
    
    /*************************************************************
