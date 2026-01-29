@@ -108,71 +108,55 @@ inline Node <T> * copy(const Node <T> * pSource)
 template <class T>
 inline void assign(Node<T>*& pDestination, const Node<T>* pSource)
 {
+   // self-assignment, do nothing
+   if (pDestination == pSource)
+      return;
+
    Node<T>* pDest = pDestination;
+   Node<T>* pLastDest = nullptr; 
    const Node<T>* pSrc = pSource;
 
-   {
-      if (pSource == nullptr)
-      {
-         while (pDestination != nullptr)
-         {
-            Node<T>* pTemp = pDestination;
-            pDestination = pDestination->pNext;
-            delete pTemp;
-         }
-
-         pDestination = nullptr;
-         return;
-      }
-   }
-
+   // Copy over the data for the nodes that exist in both lists
    while (pDest != nullptr && pSrc != nullptr)
    {
-      pDest->data = pSrc->data;   
+      pDest->data = pSrc->data;
+      pLastDest = pDest;
       pDest = pDest->pNext;
       pSrc = pSrc->pNext;
    }
 
+   // If there are leftover nodes in the destination list, delete them
    if (pDest != nullptr)
    {
-      Node<T>* pDelete = pDest;
+      if (pLastDest)
+         pLastDest->pNext = nullptr;
+      else
+         pDestination = nullptr; 
 
-      if (pDest->pPrev)
-         pDest->pPrev->pNext = nullptr;
-
-      while (pDelete != nullptr)
+      // Delete remaining nodes
+      while (pDest != nullptr)
       {
-         Node<T>* pTemp = pDelete;
-         pDelete = pDelete->pNext;
-         delete pTemp;   
+         Node<T>* pTemp = pDest;
+         pDest = pDest->pNext;
+         delete pTemp;
       }
    }
-
-   if (pSrc != nullptr)
+   
+   // If there are leftover nodes in the source list, create new nodes
+   else if (pSrc != nullptr)
    {
-      Node<T>* pTail = pDestination;
-      if (pTail == nullptr)
-      {
-         pDestination = new Node<T>(pSrc->data);
-         pDestination->pPrev = nullptr;
-         pDestination->pNext = nullptr;
-         pTail = pDestination;
-         pSrc = pSrc->pNext;
-      }
-      else
-      {
-         while (pTail->pNext != nullptr)
-            pTail = pTail->pNext;
-      }
-
       while (pSrc != nullptr)
       {
          Node<T>* pNew = new Node<T>(pSrc->data);
-         pNew->pPrev = pTail;
+         pNew->pPrev = pLastDest;
          pNew->pNext = nullptr;
-         pTail->pNext = pNew;
 
-         pTail = pNew;
+         if (pLastDest)
+            pLastDest->pNext = pNew;
+         else
+            pDestination = pNew;
+
+         pLastDest = pNew;
          pSrc = pSrc->pNext;
       }
    }
