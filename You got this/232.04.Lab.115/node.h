@@ -187,7 +187,9 @@ inline void assign(Node<T>*& pDestination, const Node<T>* pSource)
 template <class T>
 inline void swap(Node <T>* &pLHS, Node <T>* &pRHS)
 {
-   
+   Node <T> * pTemp = pRHS;
+   pRHS = pLHS;
+   pLHS = pTemp;
 }
 
 /***********************************************
@@ -297,7 +299,12 @@ inline std::ostream & operator << (std::ostream & out, const Node <T> * pHead)
 template <class T>
 inline void clear(Node <T> * & pHead)
 {
-   
+   while (pHead)
+   {
+      Node <T> * pDelete = pHead;
+      pHead = pHead->pNext;
+      delete pDelete;
+   }
 }
 
 

@@ -40,8 +40,8 @@ public:
       test_assign_bigToSmall();
       test_swap_emptyEmpty();
       test_swap_emptyStandard();
-      //test_swap_standardEmpty();
-      //test_swap_oneTwo();
+      test_swap_standardEmpty();
+      test_swap_oneTwo();
 
       // Insert
       test_insert_emptyBefore();
@@ -58,9 +58,9 @@ public:
       //test_remove_front();
       //test_remove_back();
       //test_remove_middle();
-      //test_clear_nullptr();
-      //test_clear_one();
-      //test_clear_standard();
+      test_clear_nullptr();
+      test_clear_one();
+      test_clear_standard();
 
       // Status
       test_size_empty();
