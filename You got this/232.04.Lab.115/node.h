@@ -42,16 +42,16 @@ public:
 
    Node() 
    { 
-      pNext = pPrev = this;
+      pNext = pPrev = nullptr;
    }
-   Node(const T& data) 
+   Node(const T& data) : data(data) 
    {
-      pNext = pPrev = this;
+      pNext = pPrev = nullptr;
    }
 
-   Node(T&& data) 
+   Node(T&& data) : data(std::move(data))
    {
-      pNext = pPrev = this;
+      pNext = pPrev = nullptr;
    }
 
    //
@@ -74,7 +74,27 @@ public:
 template <class T>
 inline Node <T> * copy(const Node <T> * pSource) 
 {
-   return new Node<T>;
+   if (pSource == nullptr)
+      return nullptr;
+   else
+      {
+      Node<T>* pNewHead = new Node<T>(pSource->data);
+      pNewHead->pPrev = nullptr;
+      pNewHead->pNext = nullptr;
+
+      Node<T>* pCurrentNew = pNewHead;
+      const Node<T>* pCurrentSource = pSource->pNext;
+      while (pCurrentSource != nullptr)
+      {
+         Node<T>* pNewNode = new Node<T>(pCurrentSource->data);
+         pCurrentNew->pNext = pNewNode;
+         pNewNode->pPrev = pCurrentNew;
+         pCurrentNew = pNewNode;
+         pCurrentSource = pCurrentSource->pNext;
+      }
+      return pNewHead;
+   }
+
 }
 
 /***********************************************
@@ -86,10 +106,78 @@ inline Node <T> * copy(const Node <T> * pSource)
  *   COST   : O(n)
  **********************************************/
 template <class T>
-inline void assign(Node <T> * & pDestination, const Node <T> * pSource)
+inline void assign(Node<T>*& pDestination, const Node<T>* pSource)
 {
-   
+   Node<T>* pDest = pDestination;
+   const Node<T>* pSrc = pSource;
+
+   {
+      if (pSource == nullptr)
+      {
+         while (pDestination != nullptr)
+         {
+            Node<T>* pTemp = pDestination;
+            pDestination = pDestination->pNext;
+            delete pTemp;
+         }
+
+         pDestination = nullptr;
+         return;
+      }
+   }
+
+   while (pDest != nullptr && pSrc != nullptr)
+   {
+      pDest->data = pSrc->data;   
+      pDest = pDest->pNext;
+      pSrc = pSrc->pNext;
+   }
+
+   if (pDest != nullptr)
+   {
+      Node<T>* pDelete = pDest;
+
+      if (pDest->pPrev)
+         pDest->pPrev->pNext = nullptr;
+
+      while (pDelete != nullptr)
+      {
+         Node<T>* pTemp = pDelete;
+         pDelete = pDelete->pNext;
+         delete pTemp;   
+      }
+   }
+
+   if (pSrc != nullptr)
+   {
+      Node<T>* pTail = pDestination;
+      if (pTail == nullptr)
+      {
+         pDestination = new Node<T>(pSrc->data);
+         pDestination->pPrev = nullptr;
+         pDestination->pNext = nullptr;
+         pTail = pDestination;
+         pSrc = pSrc->pNext;
+      }
+      else
+      {
+         while (pTail->pNext != nullptr)
+            pTail = pTail->pNext;
+      }
+
+      while (pSrc != nullptr)
+      {
+         Node<T>* pNew = new Node<T>(pSrc->data);
+         pNew->pPrev = pTail;
+         pNew->pNext = nullptr;
+         pTail->pNext = pNew;
+
+         pTail = pNew;
+         pSrc = pSrc->pNext;
+      }
+   }
 }
+
 
 /***********************************************
  * SWAP
