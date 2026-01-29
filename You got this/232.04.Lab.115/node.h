@@ -217,11 +217,34 @@ inline Node <T> * remove(const Node <T> * pRemove)
  *   COST    : O(1)
  **********************************************/
 template <class T>
-inline Node <T> * insert(Node <T> * pCurrent,
-                  const T & t,
-                  bool after = false)
+inline Node <T>* insert(Node <T>* pCurrent,
+   const T& t,
+   bool after = false)
 {
-   return new Node<T>();
+   Node<T>* newNode = new Node<T>(t);
+   if (pCurrent == nullptr)
+      return newNode;
+   if (after)
+   {
+      newNode->pPrev = pCurrent;
+      newNode->pNext = pCurrent->pNext;
+      if (pCurrent->pNext != nullptr)
+      {
+         pCurrent->pNext->pPrev = newNode;
+      }
+      pCurrent->pNext = newNode;
+   }
+   else
+   {
+      newNode->pNext = pCurrent;
+      newNode->pPrev = pCurrent->pPrev;
+      if (pCurrent->pPrev != nullptr)
+      {
+         pCurrent->pPrev->pNext = newNode;
+      }
+      pCurrent->pPrev = newNode;
+   }
+   return newNode;
 }
 
 /******************************************************
@@ -233,9 +256,21 @@ inline Node <T> * insert(Node <T> * pCurrent,
  *  COST    : O(n)
  ********************************************************/
 template <class T>
-inline size_t size(const Node <T> * pHead)
+inline size_t size(const Node <T>* pHead)
 {
-   return 99;
+   if (pHead == nullptr)
+   {
+      return 0;
+   }
+   else
+   {
+      size_t count = 0;
+      for (auto p = pHead; p != nullptr; p = p->pNext)
+      {
+         count++;
+      }
+      return count;
+   }
 }
 
 /***********************************************
