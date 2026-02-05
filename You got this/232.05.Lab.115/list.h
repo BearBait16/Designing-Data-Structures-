@@ -289,10 +289,9 @@ list <T, A> ::list(size_t num, const A& a)
 {
    numElements = 0;
    pHead = pTail = nullptr;
-   T temp{};
 
    for (size_t i = 0; i < num; ++i)
-      push_back(temp);
+      push_back(T());
 }
 
 /*****************************************
