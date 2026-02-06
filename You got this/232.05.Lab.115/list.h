@@ -162,15 +162,11 @@ public:
    {
       pNext = pPrev = nullptr;
    }
-   Node(const T& data)
+   Node(const T& data) : data(data), pNext(nullptr), pPrev(nullptr)
    {
-      pNext = pPrev = nullptr;
-      this->data = data;
    }
-   Node(T&& data)
+   Node(T&& data) : data(std::move(data)), pNext(nullptr), pPrev(nullptr)
    {
-      pNext = pPrev = nullptr;
-      this->data = std::move(data);
    }
 
    //
@@ -447,7 +443,18 @@ void list <T, A> ::push_front(const T& data)
 template <typename T, typename A>
 void list <T, A> ::push_front(T&& data)
 {
+   Node* pNew = new Node(std::move(data));
 
+   pNew->pPrev = nullptr;
+   pNew->pNext = pHead;
+
+   if (pHead)
+      pHead->pPrev = pNew;
+   else
+      pTail = pNew;
+
+   pHead = pNew;
+   ++numElements;
 }
 
 
@@ -559,7 +566,46 @@ template <typename T, typename A>
 typename list <T, A> ::iterator list <T, A> ::insert(list <T, A> ::iterator it,
    const T& data)
 {
-   return end();
+   if (empty())
+   {
+      pHead = pTail = new Node(data);
+      numElements = 1;
+      return begin();
+   }
+   
+   if (it == end())
+   {
+      Node* pNew = new Node(data);
+      pNew->pPrev = pTail;
+      pTail->pNext = pNew;
+      pTail = pNew;
+      numElements++;
+      return iterator(pNew);
+   }
+   
+   if (it == begin())
+   {
+      // insert at beginning of the list
+      push_front(data);
+      return begin();
+   }
+   
+   Node* pNew = new Node(data);
+   pNew->pPrev = it.p->pPrev;
+   pNew->pNext = it.p;
+   
+   if (pNew->pPrev)
+      pNew->pPrev->pNext = pNew;
+   else
+      pHead = pNew;
+   
+   if (pNew->pNext)
+      pNew->pNext->pPrev = pNew;
+   else
+      pTail = pNew;
+   
+   numElements++;
+   return iterator(pNew);
 }
 
 
@@ -575,7 +621,46 @@ template <typename T, typename A>
 typename list <T, A> ::iterator list <T, A> ::insert(list <T, A> ::iterator it,
    T&& data)
 {
-   return end();
+   if (empty())
+   {
+      pHead = pTail = new Node(std::move(data));
+      numElements = 1;
+      return begin();
+   }
+   
+   if (it == end())
+   {
+      Node* pNew = new Node(std::move(data));
+      pNew->pPrev = pTail;
+      pTail->pNext = pNew;
+      pTail = pNew;
+      numElements++;
+      return iterator(pNew);
+   }
+   
+   if (it == begin())
+   {
+      // insert at beginning of the list
+      push_front(std::move(data));
+      return begin();
+   }
+   
+   Node* pNew = new Node(std::move(data));
+   pNew->pPrev = it.p->pPrev;
+   pNew->pNext = it.p;
+   
+   if (pNew->pPrev)
+      pNew->pPrev->pNext = pNew;
+   else
+      pHead = pNew;
+   
+   if (pNew->pNext)
+      pNew->pNext->pPrev = pNew;
+   else
+      pTail = pNew;
+   
+   numElements++;
+   return iterator(pNew);
 }
 
 /**********************************************
