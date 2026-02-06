@@ -551,8 +551,48 @@ T& list <T, A> ::back()
 template <typename T, typename A>
 typename list <T, A> ::iterator  list <T, A> ::erase(const list <T, A> ::iterator& it)
 {
-   return end();
+   if (empty())
+   {
+      return it;
+   }
+   if (it.p->pNext == nullptr && it.p->pPrev == nullptr)
+   {
+      clear();
+      return it;
+   }
+   iterator itNext = end();
+
+   if (it.p->pNext)
+   {
+      it.p->pNext->pPrev = it.p->pPrev;
+      itNext = iterator(it.p->pNext);
+   }
+   else
+   {
+      if (pTail->pPrev)
+      {
+         pTail = pTail->pPrev;
+         pTail->pNext = nullptr;
+      }
+   }
+   if (it.p->pPrev)
+   {
+      it.p->pPrev->pNext = it.p->pNext;
+   }
+   else
+   {
+      if (pHead->pNext)
+      {
+         pHead = pHead->pNext;
+         pHead->pPrev = nullptr;
+      }
+
+   }
+   delete it.p;
+   numElements--;
+   return itNext;
 }
+
 
 /******************************************
  * LIST :: INSERT
