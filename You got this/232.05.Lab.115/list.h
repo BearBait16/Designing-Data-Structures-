@@ -99,7 +99,20 @@ public:
    list <T, A> & operator = (list <T, A> &  rhs);
    list <T, A> & operator = (list <T, A> && rhs);
    list <T, A> & operator = (const std::initializer_list<T>& il);
-   void swap(list <T, A>& rhs) {}
+   void swap(list <T, A>& rhs)
+   {
+      Node* tempHead = rhs.pHead;
+      rhs.pHead = pHead;
+      pHead = tempHead;
+
+      Node* tempTail = rhs.pTail;
+      rhs.pTail = pTail;
+      pTail = tempTail;
+
+      size_t tempNum = rhs.numElements;
+      rhs.numElements = numElements;
+      numElements = tempNum;
+   }
 
    //
    // Iterator
