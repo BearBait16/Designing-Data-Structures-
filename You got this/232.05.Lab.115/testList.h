@@ -60,8 +60,8 @@ public:
       test_assignMove_bigToSmall();
       test_swap_emptyToEmpty();
       test_swap_standardToEmpty();
-//      test_swap_emptyToStandard();
-//      test_swap_bigToSmall();
+      test_swap_emptyToStandard();
+      test_swap_bigToSmall();
 
       // Iterator
       test_iterator_begin_empty();

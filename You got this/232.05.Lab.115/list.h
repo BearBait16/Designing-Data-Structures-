@@ -52,33 +52,44 @@ public:
    }
    list(list <T, A> & rhs, const A& a = A())
    {
-      pHead = rhs.pHead;
-      pTail = rhs.pTail;
-      numElements = rhs.numElements;
-
-      rhs.pHead = nullptr;
-      rhs.pTail = nullptr;
-      rhs.numElements = 0;
+      numElements = 0;
+      pHead = pTail = nullptr;
+      
+      if (rhs.pHead == nullptr)
+         return;
+      
+      for (Node * p = rhs.pHead; p; p = p->pNext)
+      {
+         push_back(p->data);
+      }
    }
    list(list <T, A>&& rhs, const A& a = A());
    list(size_t num, const T & t, const A& a = A());
    list(size_t num, const A& a = A());
    list(const std::initializer_list<T>& il, const A& a = A()) 
    {
-      numElements = 99;
-      pHead = pTail = new list <T, A> ::Node();
-      pHead->pNext = pTail->pNext = pHead->pPrev = pTail->pPrev = nullptr;
+      numElements = 0;
+      pHead = pTail = nullptr;
+      
+      for (auto it = il.begin(); it != il.end(); it++)
+      {
+         push_back(*it);
+      }
    }
    template <class Iterator>
    list(Iterator first, Iterator last, const A& a = A())
    {
-      numElements = 99;
-      pHead = pTail = new list <T, A> ::Node();
-      pHead->pNext = pTail->pNext = pHead->pPrev = pTail->pPrev = nullptr;
+      numElements = 0;
+      pHead = pTail = nullptr;
+      
+      for (auto it = first; it != last; it++)
+      {
+         push_back(*it);
+      }
    }
    ~list()
    { 
-
+      clear();
    }
    
    //
@@ -158,9 +169,9 @@ public:
    //
    // Construct
    //
-   Node()
+   Node() 
    {
-      pNext = pPrev = nullptr;
+      pPrev = pPrev = nullptr;
    }
    Node(const T& data) : data(data), pNext(nullptr), pPrev(nullptr)
    {
@@ -265,9 +276,26 @@ list <T, A> ::list(size_t num, const T& t, const A& a)
 {
    numElements = 0;
    pHead = pTail = nullptr;
+   
+   if (num == 0)
+      return;
+   
+   pHead = new Node(t);
+   pHead->pPrev = nullptr;
+   pHead->pNext = nullptr;
+   pTail = pHead;
+   numElements = 1;
 
-   for (size_t i = 0; i < num; ++i)
-      push_back(t);
+   for (size_t i = 1; i < num; ++i)
+   {
+      Node * pNew = new Node(t);
+      pNew->pPrev = pTail;
+      pNew->pNext = nullptr;
+      pTail->pNext = pNew;
+      pTail = pNew;
+      ++numElements;
+   }
+   
 }
 
 /*****************************************
@@ -279,9 +307,26 @@ list <T, A> ::list(size_t num, const A& a)
 {
    numElements = 0;
    pHead = pTail = nullptr;
+   
+   if (num == 0)
+      return;
+   
+   pHead = new Node();
+   pHead->pPrev = nullptr;
+   pHead->pNext = nullptr;
+   pTail = pHead;
+   numElements = 1;
 
-   for (size_t i = 0; i < num; ++i)
-      push_back(T());
+   for (size_t i = 1; i < num; ++i)
+   {
+      Node * pNew = new Node();
+      pNew->pPrev = pTail;
+      pNew->pNext = nullptr;
+      pTail->pNext = pNew;
+      pTail = pNew;
+      ++numElements;
+   }
+   
 }
 
 /*****************************************
