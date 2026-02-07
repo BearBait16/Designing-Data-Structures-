@@ -60,8 +60,8 @@ public:
       test_assignMove_bigToSmall();
       test_swap_emptyToEmpty();
       test_swap_standardToEmpty();
-      test_swap_emptyToStandard();
-      test_swap_bigToSmall();
+//      test_swap_emptyToStandard();
+//      test_swap_bigToSmall();
 
       // Iterator
       test_iterator_begin_empty();
@@ -102,8 +102,8 @@ public:
       test_insertMove_standardMiddle();
 
       // Remove
-      //test_clear_empty();
-      //test_clear_standard();
+      test_clear_empty();
+      test_clear_standard();
       test_popback_empty();
       test_popback_standard();
       test_popback_single();

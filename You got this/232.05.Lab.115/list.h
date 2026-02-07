@@ -329,12 +329,43 @@ list <T, A>& list <T, A> :: operator = (list <T, A>&& rhs)
 template <typename T, typename A>
 list <T, A>& list <T, A> :: operator = (list <T, A>& rhs)
 {
-   if (this != &rhs)
+   auto itRHS = rhs.begin();
+   auto itLHS = begin();
+   
+   while (itRHS != rhs.end() && itLHS != end())
    {
-      clear();
-      for (auto it = rhs.begin(); it != rhs.end(); ++it)
-         push_back(*it);
+      *itLHS = *itRHS;
+      ++itRHS;
+      ++itLHS;
    }
+   
+   if (itRHS != rhs.end())
+   {
+      while (itRHS != rhs.end())
+      {
+         push_back(*itRHS);
+         ++itRHS;
+      }
+   }
+   
+   else if (rhs.empty())
+      clear();
+      
+   else if (itLHS != end())
+   {
+      Node * p = itLHS.p;
+      pTail = p->pPrev;
+      Node * pNext = p->pNext;
+      while (p)
+      {
+         pNext = p->pNext;
+         delete(p);
+         p = pNext;
+         numElements--;
+      }
+      pTail->pNext = nullptr;
+   }
+
    return *this;
 }
 
@@ -348,10 +379,42 @@ list <T, A>& list <T, A> :: operator = (list <T, A>& rhs)
 template <typename T, typename A>
 list <T, A>& list <T, A> :: operator = (const std::initializer_list<T>& rhs)
 {
-   clear();
-   for (const T& value : rhs)
-      push_back(value);
+   auto itRHS = rhs.begin();
+   auto itLHS = begin();
+   
+   while (itRHS != rhs.end() && itLHS != end())
+   {
+      *itLHS = *itRHS;
+      ++itRHS;
+      ++itLHS;
+   }
+   
+   if (itRHS != rhs.end())
+   {
+      while (itRHS != rhs.end())
+      {
+         push_back(*itRHS);
+         ++itRHS;
+      }
+   }
+      
+   else if (itLHS != end())
+   {
+      Node * p = itLHS.p;
+      pTail = p->pPrev;
+      Node * pNext = p->pNext;
+      while (p)
+      {
+         pNext = p->pNext;
+         delete(p);
+         p = pNext;
+         numElements--;
+      }
+      pTail->pNext = nullptr;
+   }
+
    return *this;
+
 }
 
 /**********************************************
