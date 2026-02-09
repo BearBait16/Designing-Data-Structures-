@@ -60,7 +60,10 @@ public:
 template <class T>
 inline size_t size(const BNode <T> * p)
 {
-   return 99;
+   if (p == nullptr)
+      return 0;
+
+   return size(p->pLeft) + 1 + size(p->pRight);
 }
 
 

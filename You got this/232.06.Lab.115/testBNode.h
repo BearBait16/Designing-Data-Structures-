@@ -68,9 +68,9 @@ public:
 //      test_clear_standard();
 
       // Status
-//      test_size_empty();
-//      test_size_one();
-//      test_size_standard();
+      test_size_empty();
+      test_size_one();
+      test_size_standard();
 
       report("BNode");
    }
