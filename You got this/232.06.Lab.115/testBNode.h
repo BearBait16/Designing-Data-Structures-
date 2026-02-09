@@ -43,10 +43,10 @@ public:
       test_assign_oneToStandard();
       test_assign_standardToOne();
       test_assign_standardToStandard();
-//      test_swap_emptyEmpty();
-//      test_swap_emptyStandard();
-//      test_swap_standardEmpty();
-//      test_swap_oneTwo();
+      test_swap_emptyEmpty();
+      test_swap_emptyStandard();
+      test_swap_standardEmpty();
+      test_swap_oneTwo();
 
       // Insert
       test_addLeft_oneValue();
