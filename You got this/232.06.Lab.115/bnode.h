@@ -74,11 +74,11 @@ inline size_t size(const BNode <T> * p)
 template <class T>
 inline void addLeft(BNode <T> * pNode, BNode <T> * pAdd)
 {
-   if (pAdd)
+   if (pAdd) // If the new Node isn't null, we set pNode to the parent Node
    {
       pAdd->pParent = pNode;
    }
-   pNode->pLeft = pAdd;
+   pNode->pLeft = pAdd; // Regardless, we set the pLeft of the parent node to the value at pAdd
 }
 
 /******************************************************
@@ -88,11 +88,11 @@ inline void addLeft(BNode <T> * pNode, BNode <T> * pAdd)
 template <class T>
 inline void addRight (BNode <T> * pNode, BNode <T> * pAdd)
 {
-   if (pAdd)
+   if (pAdd) // If the new Node isn't null, we set pNode to the parent Node
    {
       pAdd->pParent = pNode;
    }
-   pNode->pRight = pAdd;
+   pNode->pRight = pAdd; // Regardless, we set the pRight of the parent node to the value at pAdd
 }
 
 /******************************************************
@@ -102,17 +102,17 @@ inline void addRight (BNode <T> * pNode, BNode <T> * pAdd)
 template <class T>
 inline void addLeft (BNode <T> * pNode, const T & t) 
 {
-   BNode<T>* pAdd = new BNode<T>(t);
-   pAdd->pParent = pNode;
-   pNode->pLeft = pAdd;
+   BNode<T>* pAdd = new BNode<T>(t); // Create a pointer to the new Node
+   pAdd->pParent = pNode; // Set the new Node parent to node in tree
+   pNode->pLeft = pAdd; // Set the new Node to the left pointer of the Parent Node
 }
 
 template <class T>
 inline void addLeft(BNode <T>* pNode, T && t)
 {
-   BNode<T>* pAdd = new BNode<T>(std::move(t));
-   pAdd->pParent = pNode;
-   pNode->pLeft = pAdd;
+   BNode<T>* pAdd = new BNode<T>(std::move(t)); // Create a pointer to the new Node
+   pAdd->pParent = pNode; // Set the new Node parent to node in tree
+   pNode->pLeft = pAdd; // Set the new Node to the left pointer of the Parent Node
 }
 
 /******************************************************
@@ -122,17 +122,17 @@ inline void addLeft(BNode <T>* pNode, T && t)
 template <class T>
 void addRight (BNode <T> * pNode, const T & t)
 {
-   BNode<T>* pAdd = new BNode<T>(t);
-   pAdd->pParent = pNode;
-   pNode->pRight = pAdd;
+   BNode<T>* pAdd = new BNode<T>(t); // Create a pointer to the new Node
+   pAdd->pParent = pNode; // Set the new Node parent to node in tree
+   pNode->pRight = pAdd; // Set the new Node to the right pointer of the Parent Node
 }
 
 template <class T>
 void addRight(BNode <T>* pNode, T && t)
 {
-   BNode<T>* pAdd = new BNode<T>(std::move(t));
-   pAdd->pParent = pNode;
-   pNode->pRight = pAdd;
+   BNode<T>* pAdd = new BNode<T>(std::move(t)); // Create a pointer to the new Node
+   pAdd->pParent = pNode; // Set the new Node parent to node in tree
+   pNode->pRight = pAdd; // Set the new Node to the right pointer of the Parent Node
 }
 
 /*****************************************************
