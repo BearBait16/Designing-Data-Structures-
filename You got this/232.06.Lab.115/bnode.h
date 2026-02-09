@@ -34,17 +34,14 @@ public:
    // 
    // Construct
    //
-   BNode()
+   BNode() : pLeft(nullptr), pRight(nullptr), pParent(nullptr)
    {
-      pLeft = pRight = this;
    }
-   BNode(const T &  t) 
+   BNode(const T &  t) : data(t), pLeft(nullptr), pRight(nullptr), pParent(nullptr)
    {
-      pLeft = pRight = this;
    }
-   BNode(T && t) 
+   BNode(T && t) : data(std::move(t)), pLeft(nullptr), pRight(nullptr), pParent(nullptr)
    {
-      pLeft = pRight = this;
    }
 
    //
@@ -149,7 +146,21 @@ inline void swap(BNode <T>*& pLHS, BNode <T>*& pRHS)
 template <class T>
 BNode <T> * copy(const BNode <T> * pSrc) 
 {
-   return new BNode<T>;
+   if (!pSrc) return nullptr; // we don't need to do anything if it's null
+      
+   BNode<T> * pDest = new BNode<T> (pSrc->data); // create the destination
+   
+   // add the left side
+   pDest->pLeft = copy(pSrc);
+   if (pDest->pLeft != nullptr)
+      pDest->pLeft->pParent = pDest;
+   
+   // add the right side
+   pDest->pRight = copy(pSrc);
+   if (pDest->pRight != nullptr)
+      pDest->pRight->pParent = pDest;
+   
+   return pDest;
 }
 
 /**********************************************
