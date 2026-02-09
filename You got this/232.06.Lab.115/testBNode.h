@@ -34,11 +34,11 @@ public:
       test_constructValue_move();
       test_copy_nullptr();
       test_copy_one();
-//      test_copy_standard();
+      test_copy_standard();
 
       // Assign
-//      test_assign_emptyToEmpty();
-//      test_assign_standardToEmpty();
+      test_assign_emptyToEmpty();
+      test_assign_standardToEmpty();
 //      test_assign_emptyToStandard();
 //      test_assign_oneToStandard();
 //      test_assign_standardToOne();

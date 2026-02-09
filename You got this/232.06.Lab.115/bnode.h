@@ -151,12 +151,12 @@ BNode <T> * copy(const BNode <T> * pSrc)
    BNode<T> * pDest = new BNode<T> (pSrc->data); // create the destination
    
    // add the left side
-   pDest->pLeft = copy(pSrc);
+   pDest->pLeft = copy(pSrc->pLeft);
    if (pDest->pLeft != nullptr)
       pDest->pLeft->pParent = pDest;
    
    // add the right side
-   pDest->pRight = copy(pSrc);
+   pDest->pRight = copy(pSrc->pRight);
    if (pDest->pRight != nullptr)
       pDest->pRight->pParent = pDest;
    
@@ -171,5 +171,18 @@ BNode <T> * copy(const BNode <T> * pSrc)
 template <class T>
 void assign(BNode <T> * & pDest, const BNode <T>* pSrc)
 {
-
+   // if source is empty
+   if (!pSrc)
+   {
+      clear(pDest); // if it doesn't, clear pDest
+      return;
+   }
+   
+   // if dest is empty and source exists
+   if (!pDest && pSrc)
+   {
+      pDest = new BNode<T> (pSrc->data);
+      assign(pDest->pRight, pSrc->pRight);
+      assign(pDest->pLeft,  pSrc->pLeft);
+   }
 }
