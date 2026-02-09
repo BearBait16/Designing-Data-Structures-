@@ -14,7 +14,7 @@
  *        BNode         : A class representing a BNode
  *    Additionally, it will contain a few functions working on Node
  * Author
- *    <your names here>
+ *    Katy's Favourites
  ************************************************************************/
 
 #pragma once
@@ -159,7 +159,9 @@ void clear(BNode <T> * & pThis)
 template <class T>
 inline void swap(BNode <T>*& pLHS, BNode <T>*& pRHS)
 {
-
+   BNode <T> * pTemp = pRHS;
+   pRHS = pLHS;
+   pLHS = pTemp;
 }
 
 /**********************************************
