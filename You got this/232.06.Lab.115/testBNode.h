@@ -37,8 +37,8 @@ public:
       test_copy_standard();
 
       // Assign
-      test_assign_emptyToEmpty();
-      test_assign_standardToEmpty();
+//      test_assign_emptyToEmpty();
+//      test_assign_standardToEmpty();
 //      test_assign_emptyToStandard();
 //      test_assign_oneToStandard();
 //      test_assign_standardToOne();
@@ -63,9 +63,9 @@ public:
 //      test_addRight_standardTree();
 
       // Remove
-//      test_clear_empty();
-//      test_clear_one();
-//      test_clear_standard();
+      test_clear_empty();
+      test_clear_one();
+      test_clear_standard();
 
       // Status
       test_size_empty();

@@ -127,7 +127,12 @@ void addRight(BNode <T>* pNode, T && t)
 template <class T>
 void clear(BNode <T> * & pThis)
 {
-
+   if (!pThis)
+      return;
+   clear(pThis->pLeft);
+   clear(pThis->pRight);
+   delete(pThis);
+   pThis = nullptr;
 }
 
 /***********************************************
