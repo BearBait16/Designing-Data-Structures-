@@ -159,9 +159,9 @@ void clear(BNode <T> * & pThis)
 template <class T>
 inline void swap(BNode <T>*& pLHS, BNode <T>*& pRHS)
 {
-   BNode <T> * pTemp = pRHS;
-   pRHS = pLHS;
-   pLHS = pTemp;
+   BNode <T> * pTemp = pRHS; // create temporary data from RHS
+   pRHS = pLHS; // set RHS to current LHS
+   pLHS = pTemp; // set LHS to temp data
 }
 
 /**********************************************
@@ -211,13 +211,17 @@ void assign(BNode <T> * & pDest, const BNode <T>* pSrc)
    }
    else
    {
+      // if both exist
       pDest->data = pSrc->data;
    }
-      assign(pDest->pLeft,  pSrc->pLeft);
-      if (pDest->pLeft)
-         pDest->pLeft->pParent = pDest;
+   
+   // assign the left nodes
+   assign(pDest->pLeft,  pSrc->pLeft);
+   if (pDest->pLeft)
+      pDest->pLeft->pParent = pDest;
 
-      assign(pDest->pRight, pSrc->pRight);
-      if (pDest->pRight)
-         pDest->pRight->pParent = pDest;
+   // assign the right nodes
+   assign(pDest->pRight, pSrc->pRight);
+   if (pDest->pRight)
+      pDest->pRight->pParent = pDest;
 }
