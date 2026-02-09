@@ -67,56 +67,72 @@ inline size_t size(const BNode <T> * p)
 }
 
 
-/******************************************************
- * ADD LEFT
- * Add a node to the left of the current node
- ******************************************************/
-template <class T>
-inline void addLeft(BNode <T> * pNode, BNode <T> * pAdd)
-{
+/**
 
+ADD LEFT
+Add a node to the left of the current node**/
+template <class T>
+inline void addLeft(BNode <T>* pNode, BNode <T>* pAdd)
+{
+   if (pAdd)
+   {
+      pAdd->pParent = pNode;
+   }
+   pNode->pLeft = pAdd;
 }
 
-/******************************************************
- * ADD RIGHT
- * Add a node to the right of the current node
- ******************************************************/
-template <class T>
-inline void addRight (BNode <T> * pNode, BNode <T> * pAdd)
-{
+/**
 
+ADD RIGHT
+Add a node to the right of the current node**/
+template <class T>
+inline void addRight(BNode <T>* pNode, BNode <T>* pAdd)
+{
+   if (pAdd)
+   {
+      pAdd->pParent = pNode;
+   }
+   pNode->pRight = pAdd;
 }
 
-/******************************************************
- * ADD LEFT
- * Add a node to the left of the current node
- ******************************************************/
+/**
+
+ADD LEFT
+Add a node to the left of the current node**/
 template <class T>
-inline void addLeft (BNode <T> * pNode, const T & t) 
+inline void addLeft(BNode <T>* pNode, const T& t)
 {
-
-}
-
-template <class T>
-inline void addLeft(BNode <T>* pNode, T && t)
-{
-
-}
-
-/******************************************************
- * ADD RIGHT
- * Add a node to the right of the current node
- ******************************************************/
-template <class T>
-void addRight (BNode <T> * pNode, const T & t)
-{
-
+   BNode<T>* pAdd = new BNode<T>(t);
+   pAdd->pParent = pNode;
+   pNode->pLeft = pAdd;
 }
 
 template <class T>
-void addRight(BNode <T>* pNode, T && t)
+inline void addLeft(BNode <T>* pNode, T&& t)
 {
+   BNode<T>* pAdd = new BNode<T>(t);
+   pAdd->pParent = pNode;
+   pNode->pLeft = pAdd;
+}
 
+/**
+
+ADD RIGHT
+Add a node to the right of the current node**/
+template <class T>
+void addRight(BNode <T>* pNode, const T& t)
+{
+   BNode<T>* pAdd = new BNode<T>(t);
+   pAdd->pParent = pNode;
+   pNode->pRight = pAdd;
+}
+
+template <class T>
+void addRight(BNode <T>* pNode, T&& t)
+{
+   BNode<T>* pAdd = new BNode<T>(t);
+   pAdd->pParent = pNode;
+   pNode->pRight = pAdd;
 }
 
 /*****************************************************
@@ -190,7 +206,16 @@ void assign(BNode <T> * & pDest, const BNode <T>* pSrc)
    if (!pDest && pSrc)
    {
       pDest = new BNode<T> (pSrc->data);
-      assign(pDest->pRight, pSrc->pRight);
-      assign(pDest->pLeft,  pSrc->pLeft);
    }
+   else
+   {
+      pDest->data = pSrc->data;
+   }
+      assign(pDest->pLeft,  pSrc->pLeft);
+      if (pDest->pLeft)
+         pDest->pLeft->pParent = pDest;
+
+      assign(pDest->pRight, pSrc->pRight);
+      if (pDest->pRight)
+         pDest->pRight->pParent = pDest;
 }
