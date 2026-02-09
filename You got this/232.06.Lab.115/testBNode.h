@@ -53,10 +53,10 @@ public:
       test_addLeft_standardValue();
       test_addRight_oneValue();
       test_addRight_standardValue();
-//      test_addLeftMove_oneValue();
-//      test_addLeftMove_standardValue();
-//      test_addRightMove_oneValue();
-//      test_addRightMove_standardValue();
+      test_addLeftMove_oneValue();
+      test_addLeftMove_standardValue();
+      test_addRightMove_oneValue();
+      test_addRightMove_standardValue();
       test_addLeft_oneTree();
       test_addLeft_standardTree();
       test_addRight_oneTree();

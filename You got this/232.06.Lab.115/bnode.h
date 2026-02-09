@@ -110,7 +110,7 @@ inline void addLeft (BNode <T> * pNode, const T & t)
 template <class T>
 inline void addLeft(BNode <T>* pNode, T && t)
 {
-   BNode<T>* pAdd = new BNode<T>(t);
+   BNode<T>* pAdd = new BNode<T>(std::move(t));
    pAdd->pParent = pNode;
    pNode->pLeft = pAdd;
 }
@@ -130,7 +130,7 @@ void addRight (BNode <T> * pNode, const T & t)
 template <class T>
 void addRight(BNode <T>* pNode, T && t)
 {
-   BNode<T>* pAdd = new BNode<T>(t);
+   BNode<T>* pAdd = new BNode<T>(std::move(t));
    pAdd->pParent = pNode;
    pNode->pRight = pAdd;
 }
