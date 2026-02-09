@@ -60,8 +60,8 @@ public:
 template <class T>
 inline size_t size(const BNode <T> * p)
 {
-   if (p == nullptr)
-      return 0;
+   if (!p)
+      return 0; // if its a nullptr then there is no size
 
    return size(p->pLeft) + 1 + size(p->pRight);
 }
@@ -144,11 +144,11 @@ template <class T>
 void clear(BNode <T> * & pThis)
 {
    if (!pThis)
-      return;
-   clear(pThis->pLeft);
-   clear(pThis->pRight);
-   delete(pThis);
-   pThis = nullptr;
+      return; // if its the nullptr do nothing
+   clear(pThis->pLeft); // clear the left node
+   clear(pThis->pRight); // clear the right node
+   delete(pThis); // delete the node
+   pThis = nullptr; // and set it to nullptr
 }
 
 /***********************************************
