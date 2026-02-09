@@ -67,12 +67,12 @@ inline size_t size(const BNode <T> * p)
 }
 
 
-/**
-
-ADD LEFT
-Add a node to the left of the current node**/
+/******************************************************
+ * ADD LEFT
+ * Add a node to the left of the current node
+ ******************************************************/
 template <class T>
-inline void addLeft(BNode <T>* pNode, BNode <T>* pAdd)
+inline void addLeft(BNode <T> * pNode, BNode <T> * pAdd)
 {
    if (pAdd)
    {
@@ -81,12 +81,12 @@ inline void addLeft(BNode <T>* pNode, BNode <T>* pAdd)
    pNode->pLeft = pAdd;
 }
 
-/**
-
-ADD RIGHT
-Add a node to the right of the current node**/
+/******************************************************
+ * ADD RIGHT
+ * Add a node to the right of the current node
+ ******************************************************/
 template <class T>
-inline void addRight(BNode <T>* pNode, BNode <T>* pAdd)
+inline void addRight (BNode <T> * pNode, BNode <T> * pAdd)
 {
    if (pAdd)
    {
@@ -95,12 +95,12 @@ inline void addRight(BNode <T>* pNode, BNode <T>* pAdd)
    pNode->pRight = pAdd;
 }
 
-/**
-
-ADD LEFT
-Add a node to the left of the current node**/
+/******************************************************
+ * ADD LEFT
+ * Add a node to the left of the current node
+ ******************************************************/
 template <class T>
-inline void addLeft(BNode <T>* pNode, const T& t)
+inline void addLeft (BNode <T> * pNode, const T & t) 
 {
    BNode<T>* pAdd = new BNode<T>(t);
    pAdd->pParent = pNode;
@@ -108,19 +108,19 @@ inline void addLeft(BNode <T>* pNode, const T& t)
 }
 
 template <class T>
-inline void addLeft(BNode <T>* pNode, T&& t)
+inline void addLeft(BNode <T>* pNode, T && t)
 {
    BNode<T>* pAdd = new BNode<T>(t);
    pAdd->pParent = pNode;
    pNode->pLeft = pAdd;
 }
 
-/**
-
-ADD RIGHT
-Add a node to the right of the current node**/
+/******************************************************
+ * ADD RIGHT
+ * Add a node to the right of the current node
+ ******************************************************/
 template <class T>
-void addRight(BNode <T>* pNode, const T& t)
+void addRight (BNode <T> * pNode, const T & t)
 {
    BNode<T>* pAdd = new BNode<T>(t);
    pAdd->pParent = pNode;
@@ -128,7 +128,7 @@ void addRight(BNode <T>* pNode, const T& t)
 }
 
 template <class T>
-void addRight(BNode <T>* pNode, T&& t)
+void addRight(BNode <T>* pNode, T && t)
 {
    BNode<T>* pAdd = new BNode<T>(t);
    pAdd->pParent = pNode;
