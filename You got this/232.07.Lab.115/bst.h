@@ -111,8 +111,8 @@ public:
    // Status
    //
 
-   bool   empty() const noexcept { return true; }
-   size_t size()  const noexcept { return 99;   }
+   bool   empty() const noexcept { return numElements == 0; }
+   size_t size()  const noexcept { return numElements;   }
    
 private:
 
@@ -136,15 +136,15 @@ public:
    //
    BNode()
    {
-      pLeft = pRight = this;
+      pLeft = pRight = pParent = nullptr;
    }
-   BNode(const T &  t) 
+   BNode(const T &  t) : data(t)
    {
-      pLeft = pRight = this;
+      pLeft = pRight = pParent = nullptr;
    }
-   BNode(T && t) 
-   {  
-      pLeft = pRight = this;
+   BNode(T && t) : data(std::move(t))
+   {
+      pLeft = pRight = pParent = nullptr;
    }
 
    //
@@ -160,8 +160,8 @@ public:
    // 
    // Status
    //
-   bool isRightChild(BNode * pNode) const { return true; }
-   bool isLeftChild( BNode * pNode) const { return true; }
+   bool isRightChild(BNode * pNode) const { return pNode && pNode->pParent && pNode->pParent->pRight == pNode; }
+   bool isLeftChild( BNode * pNode) const { return pNode && pNode->pParent && pNode->pParent->pLeft == pNode; }
 
    // balance the tree
    void balance();
@@ -202,30 +202,33 @@ class BST <T> :: iterator
 public:
    // constructors and assignment
    iterator(BNode * p = nullptr)          
-   { 
+   {
+      this->pNode = p;
    }
    iterator(const iterator & rhs)         
-   { 
+   {
+      this->pNode = rhs.pNode;
    }
    iterator & operator = (const iterator & rhs)
    {
+      this->pNode = rhs.pNode;
       return *this;
    }
 
    // compare
    bool operator == (const iterator & rhs) const
    {
-      return true;
+      return this->pNode == rhs.pNode;
    }
    bool operator != (const iterator & rhs) const
    {
-      return true;
+      return this->pNode != rhs.pNode;
    }
 
    // de-reference. Cannot change because it will invalidate the BST
    const T & operator * () const 
    {
-      return *(new T);
+      return pNode->data;
    }
 
    // increment and decrement
@@ -265,8 +268,8 @@ private:
 template <typename T>
 BST <T> ::BST()
 {
-   numElements = 99;
-   root = new BNode;
+   numElements = 0;
+   root = nullptr;
 }
 
 /*********************************************
@@ -397,7 +400,20 @@ void BST <T> ::clear() noexcept
 template <typename T>
 typename BST <T> :: iterator custom :: BST <T> :: begin() const noexcept
 {
-   return end();
+   // if it is empty, return end
+   if (empty())
+      return end();
+   
+   // set p to the root of the tree
+   BNode * p = root;
+   while (p->pLeft)
+   {
+      // while there is a left node, return the next left one
+      p = p->pLeft;
+   }
+   
+   // return an iterator to p
+   return iterator(p);
 }
 
 
@@ -639,7 +655,45 @@ void BST <T> :: BNode :: balance()
 template <typename T>
 typename BST <T> :: iterator & BST <T> :: iterator :: operator ++ ()
 {
-   return *this;  
+   // in case pNode is null
+   if (pNode == nullptr)
+      return *this;
+   
+   // case one: we have a right child
+   else if (pNode->pRight)
+   {
+      pNode = pNode->pRight; // set the current to the child
+      while (pNode->pLeft) {
+         // while there is a left child, go down
+         // and reassign current to that child
+         pNode = pNode->pLeft;
+      }
+   }
+   
+   // case two: we have no right child and we are our parent's left child
+   else if (pNode->pRight == nullptr &&
+            pNode->pParent->pLeft == pNode)
+   {
+      // return the parent
+      pNode = pNode->pParent;
+   }
+   
+   // case three: we have no right child and we are our parent's right child
+   else if (pNode->pRight == nullptr &&
+            pNode->pParent->pRight == pNode)
+   {
+      while (pNode->pParent && pNode->pParent->pRight == pNode)
+      {
+         // while we have a parent and we are a right child,
+         // set the node to the parent
+         pNode = pNode->pParent;
+      }
+      
+      // return one more
+      pNode = pNode->pParent;
+   }
+   
+   return *this;
 }
 
 /**************************************************
@@ -649,6 +703,44 @@ typename BST <T> :: iterator & BST <T> :: iterator :: operator ++ ()
 template <typename T>
 typename BST <T> :: iterator & BST <T> :: iterator :: operator -- ()
 {
+   // in case pNode is null
+   if (pNode == nullptr)
+      return *this;
+   
+   // case one: we have a left child
+   else if (pNode->pLeft)
+   {
+      pNode = pNode->pLeft; // set the current to the child
+      while (pNode->pRight) {
+         // while there is a right child, go down
+         // and reassign current to that child
+         pNode = pNode->pRight;
+      }
+   }
+   
+   // case two: we have no left child and we are our parent's right child
+   else if (pNode->pLeft == nullptr &&
+            pNode->pParent->pRight == pNode)
+   {
+      // return the parent
+      pNode = pNode->pParent;
+   }
+   
+   // case three: we have no left child and we are our parent's left child
+   else if (pNode->pLeft == nullptr &&
+            pNode->pParent->pLeft== pNode)
+   {
+      while (pNode->pParent && pNode->pParent->pLeft == pNode)
+      {
+         // while we have a parent and we are a left child,
+         // set the node to the parent
+         pNode = pNode->pParent;
+      }
+      
+      // return one more
+      pNode = pNode->pParent;
+   }
+   
    return *this;
 
 }
