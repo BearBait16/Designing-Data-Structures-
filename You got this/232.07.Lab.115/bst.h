@@ -424,6 +424,22 @@ typename BST <T> :: iterator custom :: BST <T> :: begin() const noexcept
 template <typename T>
 typename BST <T> :: iterator BST<T> :: find(const T & t)
 {
+   BNode* p = root;
+   while (p)
+   {
+      if (p->data == t)
+      {
+         return iterator(p);
+      }
+      else if (t < p->data)
+      {
+         p = p->pLeft;
+      }
+      else
+      {
+         p = p->pRight;
+      }
+   }
    return end();
 }
 
