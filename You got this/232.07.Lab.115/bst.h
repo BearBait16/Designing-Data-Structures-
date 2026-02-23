@@ -443,7 +443,10 @@ typename BST <T> :: iterator BST<T> :: find(const T & t)
 template <typename T>
 void BST <T> :: BNode :: addLeft (BNode * pNode)
 {
-
+   pLeft = pNode;
+   pNode->pParent = this;
+   numElements++;
+   pNode.balance();
 }
 
 /******************************************************
@@ -453,7 +456,10 @@ void BST <T> :: BNode :: addLeft (BNode * pNode)
 template <typename T>
 void BST <T> :: BNode :: addRight (BNode * pNode)
 {
-
+   pRight = pNode;
+   pNode->pParent = this;
+   numElements++;
+   pNode.balance();
 }
 
 /******************************************************
@@ -463,8 +469,13 @@ void BST <T> :: BNode :: addRight (BNode * pNode)
 template <typename T>
 void BST<T> :: BNode :: addLeft (const T & t)
 {
-
-}
+   BNode pNode;
+   pNode.data = t;
+   pLeft = pNode;
+   pNode->pParent = this;
+   numElements++;
+   pNode.balance();
+} 
 
 /******************************************************
  * BINARY NODE :: ADD LEFT
@@ -473,7 +484,12 @@ void BST<T> :: BNode :: addLeft (const T & t)
 template <typename T>
 void BST<T> ::BNode::addLeft(T && t)
 {
-
+   BNode pNode;
+   pNode.data = t;
+   pLeft = pNode;
+   pNode->pParent = this;
+   numElements++;
+   pNode.balance();
 }
 
 /******************************************************
@@ -483,7 +499,12 @@ void BST<T> ::BNode::addLeft(T && t)
 template <typename T>
 void BST <T> :: BNode :: addRight (const T & t)
 {
-
+   BNode pNode;
+   pNode.data = t;
+   pRight = pNode;
+   pNode->pParent = this;
+   numElements++;
+   pNode.balance();
 }
 
 /******************************************************
@@ -493,7 +514,12 @@ void BST <T> :: BNode :: addRight (const T & t)
 template <typename T>
 void BST <T> ::BNode::addRight(T && t)
 {
-
+   BNode pNode;
+   pNode.data = t;
+   pRight = pNode;
+   pNode->pParent = this;
+   numElements++;
+   pNode.balance();
 }
 
 #ifdef DEBUG
@@ -626,14 +652,38 @@ template <typename T>
 void BST <T> :: BNode :: balance()
 {
    // Case 1: if we are the root, then color ourselves black and call it a day.
-
+   if (pParent == nullptr)
+   {
+      isRed = false;
+   }
 
    // Case 2: if the parent is black, then there is nothing left to do
+   else if (pParent->isRed == false)
+   {
 
+   }
    // Case 3: if the aunt is red, then just recolor
 
-   // Case 4: if the aunt is black or non-existant, then we need to rotate
+   else if (isRightChild() && pParent->pLeft->isRed == true)
+   {
+      isRed = false;
+      pParent->isRed = true;
+      pParent->pLeft->isRed = false;
+      balance();
+   }
 
+   else if (isLeftChild() && pParent->pRight->isRed == true)
+   {
+      isRed = false;
+      pParent->isRed = true;
+      pParent->pRight->isRed = false;
+      balance();
+   }
+   // Case 4: if the aunt is black or non-existant, then we need to rotate
+   else if (pParent->pLeft == nullptr || pParent->pRight == nullptr)
+   {
+
+   }
    // Case 4a: We are mom's left and mom is granny's left
    // case 4b: We are mom's right and mom is granny's right
    // Case 4c: We are mom's right and mom is granny's left
