@@ -116,13 +116,13 @@ public:
       //test_insert_case4dComplex();
 
       // Remove
-      //test_erase_empty();
-      //test_erase_standardMissing();
-      //test_erase_noChildren();
-      //test_erase_oneChild();
-      //test_erase_twoChildren();
-      //test_erase_twoChildrenSpecial();
-      //test_erase_standardRoot();
+      test_erase_empty();
+      test_erase_standardMissing();
+      test_erase_noChildren();
+      test_erase_oneChild();
+      test_erase_twoChildren();
+      test_erase_twoChildrenSpecial();
+      test_erase_standardRoot();
       //test_clear_empty();
       //test_clear_standard();
 

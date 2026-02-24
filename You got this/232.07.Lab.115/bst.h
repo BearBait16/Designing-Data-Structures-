@@ -137,14 +137,17 @@ public:
    BNode()
    {
       pLeft = pRight = pParent = nullptr;
+      isRed = true;
    }
    BNode(const T &  t) : data(t)
    {
       pLeft = pRight = pParent = nullptr;
+      isRed = true;
    }
    BNode(T && t) : data(std::move(t))
    {
       pLeft = pRight = pParent = nullptr;
+      isRed = true;
    }
 
    //
@@ -378,9 +381,134 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(T && t, bool keepU
  * Remove a given node as specified by the iterator
  ************************************************/
 template <typename T>
-typename BST <T> ::iterator BST <T> :: erase(iterator & it)
-{  
-   return end();
+typename BST<T>::iterator BST<T>::erase(iterator& it)
+{
+   // If iterator is invalid, nothing to remove
+   if (it == end())
+      return end();
+
+   BNode* p = it.pNode;
+
+   // Save next iterator BEFORE we destroy anything
+   iterator returnValue = it;
+   ++returnValue;
+
+   // No children case
+   if (!p->pRight && !p->pLeft)
+   {
+      //Deleting root and no parent
+      if (p->pParent == nullptr)
+         root = nullptr;
+      //Detach from parent (right)
+      else if (p->pParent->pRight == p)
+         p->pParent->pRight = nullptr;
+      //Detach from parent (left)
+      else if (p->pParent->pLeft == p)
+         p->pParent->pLeft = nullptr;
+
+      //Destroy node and update size
+      delete p;
+      --numElements;
+   }
+
+   // One child (left only)
+   else if (!p->pRight && p->pLeft)
+   {
+      //If deleting root, move left child to root
+      if (p->pParent == nullptr)
+      {
+         root = p->pLeft;
+         root->pParent = nullptr;
+      }
+      //If right child, move left child up and update parent
+      else if (p->pParent->pRight == p)
+      {
+         p->pParent->pRight = p->pLeft;
+         p->pLeft->pParent = p->pParent;
+      }
+      //If left child, move left child up and update parent
+      else if (p->pParent->pLeft == p)
+      {
+         p->pParent->pLeft = p->pLeft;
+         p->pLeft->pParent = p->pParent;
+      }
+
+      //Destroy node and update size
+      delete p;
+      --numElements;
+   }
+
+   // One child (right only)
+   else if (!p->pLeft && p->pRight)
+   {
+      //If deleting root, move right child to root
+      if (p->pParent == nullptr)
+      {
+         root = p->pRight;
+         root->pParent = nullptr;
+      }
+      //If right child, move right child up and update parent
+      else if (p->pParent->pRight == p)
+      {
+         p->pParent->pRight = p->pRight;
+         p->pRight->pParent = p->pParent;
+      }
+      //If left child, move right child up and update parent
+      else if (p->pParent->pLeft == p)
+      {
+         p->pParent->pLeft = p->pRight;
+         p->pRight->pParent = p->pParent;
+      }
+
+      //Destroy node and update size
+      delete p;
+      --numElements;
+   }
+
+   // Two children case
+   else
+   {
+      //Store original node
+      BNode* original = p;
+      p = p->pRight;
+      // Find successor (smallest node in right subtree)
+      while (p->pLeft)
+         p = p->pLeft;
+
+      // Detach successor from its current location
+      if (p->pParent->pLeft == p)
+         p->pParent->pLeft = p->pRight;
+      else
+         p->pParent->pRight = p->pRight;
+
+      if (p->pRight)
+         p->pRight->pParent = p->pParent;
+
+      // Replace original node with successor
+      p->pParent = original->pParent;
+
+      if (original->pParent == nullptr)
+         root = p;
+      else if (original->pParent->pLeft == original)
+         original->pParent->pLeft = p;
+      else
+         original->pParent->pRight = p;
+
+      // Update successor's children to original's children
+      p->pLeft = original->pLeft;
+      p->pRight = original->pRight;
+
+      if (p->pLeft)
+         p->pLeft->pParent = p;
+      if (p->pRight)
+         p->pRight->pParent = p;
+
+      // Destroy original node and update size
+      delete original;
+      --numElements;
+   }
+
+   return returnValue;
 }
 
 /*****************************************************
