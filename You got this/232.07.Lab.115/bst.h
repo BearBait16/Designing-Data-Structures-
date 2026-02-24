@@ -385,16 +385,95 @@ void BST <T> :: swap (BST <T>& rhs)
  * Insert a node at a given location in the tree
  ****************************************************/
 template <typename T>
-std::pair<typename BST <T> :: iterator, bool> BST <T> :: insert(const T & t, bool keepUnique)
+std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(const T& t, bool keepUnique)
 {
-   std::pair<iterator, bool> pairReturn(end(), false);
+   if (root == nullptr)
+   {
+      BNode* pNew = new BNode(t);
+      pNew->isRed = false;
+      numElements++;
+      root = pNew;
+      return { pNew, true };
+   }
+
+   BNode* pNode = root;
+   pNode->isRed = true;
+   bool done = false;
+
+   while (done == false)
+   {
+      if (pNode->data < t)
+      {
+         if (pNode->pRight == nullptr)
+         {
+            pNode->addRight(t);
+            done = true;
+         }
+         else
+         {
+            pNode = pNode->pRight;
+         }
+      }
+      else
+      {
+         if (pNode->pLeft == nullptr)
+         {
+            pNode->addLeft(t);
+            done = true;
+         }
+         else
+         {
+            pNode = pNode->pLeft;
+         }
+      }
+   }
+   numElements = numElements + 1;
+   std::pair<iterator, bool> pairReturn(pNode, false);
    return pairReturn;
 }
 
 template <typename T>
-std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(T && t, bool keepUnique)
+std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(T&& t, bool keepUnique)
 {
-   std::pair<iterator, bool> pairReturn(end(), false);
+   if (root == nullptr)
+   {
+      root = new BNode(std::move(t));
+      numElements++;
+      return { iterator(root), true };
+   }
+
+   BNode* pNode = root;
+   bool done = false;
+
+   while (done == false)
+   {
+      if (pNode->data < t)
+      {
+         if (pNode->pRight == nullptr)
+         {
+            pNode->addRight(t);
+            done = true;
+         }
+         else
+         {
+            pNode = pNode->pRight;
+         }
+      }
+      else
+      {
+         if (pNode->pLeft == nullptr)
+         {
+            pNode->addLeft(t);
+            done = true;
+         }
+         else
+         {
+            pNode = pNode->pLeft;
+         }
+      }
+   }
+   numElements++;
+   std::pair<iterator, bool> pairReturn(pNode, false);
    return pairReturn;
 }
 
@@ -637,7 +716,7 @@ void BST <T> :: BNode :: addRight (BNode * pNode)
 template <typename T>
 void BST<T> :: BNode :: addLeft (const T & t)
 {
-   BNode * pNode = new BNode(t);
+   BNode* pNode = new BNode(t);
    pLeft = pNode;
    pNode->pParent = this;
    pNode->balance();
@@ -650,7 +729,7 @@ void BST<T> :: BNode :: addLeft (const T & t)
 template <typename T>
 void BST<T> ::BNode::addLeft(T && t)
 {
-   BNode * pNode = new BNode(t);
+   BNode* pNode = new BNode(t);
    pLeft = pNode;
    pNode->pParent = this;
    pNode->balance();
@@ -663,7 +742,7 @@ void BST<T> ::BNode::addLeft(T && t)
 template <typename T>
 void BST <T> :: BNode :: addRight (const T & t)
 {
-   BNode * pNode = new BNode(t);
+   BNode* pNode = new BNode(t);
    pRight = pNode;
    pNode->pParent = this;
    pNode->balance();
@@ -676,7 +755,7 @@ void BST <T> :: BNode :: addRight (const T & t)
 template <typename T>
 void BST <T> ::BNode::addRight(T && t)
 {
-   BNode * pNode = new BNode(t);
+   BNode* pNode = new BNode(t);
    pRight = pNode;
    pNode->pParent = this;
    pNode->balance();
@@ -809,7 +888,7 @@ int BST <T> :: BNode :: computeSize() const
  * Balance the tree from a given location
  ******************************************************/
 template <typename T>
-void BST <T> :: BNode :: balance()
+void BST <T> ::BNode::balance()
 {
    // Case 1: if we are the root, then color ourselves black and call it a day.
    if (pParent == nullptr)
@@ -824,7 +903,7 @@ void BST <T> :: BNode :: balance()
    }
    // Case 3: if the aunt is red, then just recolor
 
-   else if (isRightChild() && pParent->pLeft->isRed == true)
+   else if (isRightChild(this) && pParent->pLeft->isRed == true)
    {
       isRed = false;
       pParent->isRed = true;
@@ -832,7 +911,7 @@ void BST <T> :: BNode :: balance()
       balance();
    }
 
-   else if (isLeftChild() && pParent->pRight->isRed == true)
+   else if (isLeftChild(this) && pParent->pRight->isRed == true)
    {
       isRed = false;
       pParent->isRed = true;
