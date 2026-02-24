@@ -137,12 +137,12 @@ public:
    BNode()
    {
       pLeft = pRight = pParent = nullptr;
-      isRed = true;
+      isRed = false;
    }
    BNode(const T &  t) : data(t)
    {
       pLeft = pRight = pParent = nullptr;
-      isRed = true;
+      isRed = false;
    }
    BNode(T && t) : data(std::move(t))
    {
@@ -397,7 +397,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(const T& t, bool k
    }
 
    BNode* pNode = root;
-   pNode->isRed = true;
+   BNode* pNew = pNode; // Sets up tracking for new node
    bool done = false;
 
    while (done == false)
@@ -407,6 +407,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(const T& t, bool k
          if (pNode->pRight == nullptr)
          {
             pNode->addRight(t);
+            pNew = pNode->pRight;
             done = true;
          }
          else
@@ -419,6 +420,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(const T& t, bool k
          if (pNode->pLeft == nullptr)
          {
             pNode->addLeft(t);
+            pNew = pNode->pLeft;
             done = true;
          }
          else
@@ -428,7 +430,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(const T& t, bool k
       }
    }
    numElements = numElements + 1;
-   std::pair<iterator, bool> pairReturn(pNode, false);
+   std::pair<iterator, bool> pairReturn(pNew, true);
    return pairReturn;
 }
 
@@ -437,14 +439,15 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(T&& t, bool keepUn
 {
    if (root == nullptr)
    {
-      root = new BNode(std::move(t));
+      BNode* pNew = new BNode(t);
+      root = pNew;
+      pNew->isRed = false;
       numElements++;
-      return { iterator(root), true };
+      return { pNew, true };
    }
-
    BNode* pNode = root;
+   BNode* pNew = pNode; // Sets up tracking for new node
    bool done = false;
-
    while (done == false)
    {
       if (pNode->data < t)
@@ -452,6 +455,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(T&& t, bool keepUn
          if (pNode->pRight == nullptr)
          {
             pNode->addRight(t);
+            pNew = pNode->pRight;
             done = true;
          }
          else
@@ -464,6 +468,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(T&& t, bool keepUn
          if (pNode->pLeft == nullptr)
          {
             pNode->addLeft(t);
+            pNew = pNode->pLeft;
             done = true;
          }
          else
@@ -473,7 +478,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(T&& t, bool keepUn
       }
    }
    numElements++;
-   std::pair<iterator, bool> pairReturn(pNode, false);
+   std::pair<iterator, bool> pairReturn(pNew, true);
    return pairReturn;
 }
 
@@ -717,6 +722,7 @@ template <typename T>
 void BST<T> :: BNode :: addLeft (const T & t)
 {
    BNode* pNode = new BNode(t);
+   pNode->isRed = true;
    pLeft = pNode;
    pNode->pParent = this;
    pNode->balance();
@@ -730,6 +736,7 @@ template <typename T>
 void BST<T> ::BNode::addLeft(T && t)
 {
    BNode* pNode = new BNode(t);
+   pNode->isRed = true;
    pLeft = pNode;
    pNode->pParent = this;
    pNode->balance();
@@ -743,6 +750,7 @@ template <typename T>
 void BST <T> :: BNode :: addRight (const T & t)
 {
    BNode* pNode = new BNode(t);
+   pNode->isRed = true;
    pRight = pNode;
    pNode->pParent = this;
    pNode->balance();
@@ -756,6 +764,7 @@ template <typename T>
 void BST <T> ::BNode::addRight(T && t)
 {
    BNode* pNode = new BNode(t);
+   pNode->isRed = true;
    pRight = pNode;
    pNode->pParent = this;
    pNode->balance();
@@ -903,26 +912,27 @@ void BST <T> ::BNode::balance()
    }
    // Case 3: if the aunt is red, then just recolor
 
-   else if (isRightChild(this) && pParent->pLeft->isRed == true)
-   {
-      isRed = false;
-      pParent->isRed = true;
-      pParent->pLeft->isRed = false;
-      balance();
-   }
+   //else if (pParent->pParent->pLeft->isRed == true)
+   //{
+   //   pParent->isRed = false;
+   //   pParent->pParent->pLeft->isRed = false;
+   //   pParent->pParent->isRed = true;
+   //   pParent->pParent->balance();
+   //}
 
-   else if (isLeftChild(this) && pParent->pRight->isRed == true)
-   {
-      isRed = false;
-      pParent->isRed = true;
-      pParent->pRight->isRed = false;
-      balance();
-   }
+   //else if (pParent->pParent->pRight->isRed == true)
+   //{
+   //   pParent->isRed = false;
+   //   pParent->pParent->pRight->isRed = false;
+   //   pParent->pParent->isRed = true;
+   //   pParent->pParent->balance();
+   //}
+
    // Case 4: if the aunt is black or non-existant, then we need to rotate
-   else if (pParent->pLeft == nullptr || pParent->pRight == nullptr)
-   {
+   //else if (pParent->pLeft == nullptr || pParent->pRight == nullptr)
+   //{
 
-   }
+   //}
    // Case 4a: We are mom's left and mom is granny's left
    // case 4b: We are mom's right and mom is granny's right
    // Case 4c: We are mom's right and mom is granny's left

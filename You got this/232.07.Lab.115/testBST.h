@@ -96,24 +96,24 @@ public:
 
       // Insert
       test_insert_oneLeft();
-      //test_insert_oneRight();
-      //test_insert_duplicate();
-      //test_insert_keepUnique();
-      //test_insertMove_oneLeft();
-      //test_insertMove_oneRight();
-      //test_insertMove_duplicate();
-      //test_insertMove_keepUnique();
-      //test_insert_case1();
-      //test_insert_case2();
-      //test_insert_case3();
-      //test_insert_case4aSimple();
-      //test_insert_case4bSimple();
-      //test_insert_case4cSimple();
-      //test_insert_case4dSimple();
-      //test_insert_case4aComplex();
-      //test_insert_case4bComplex();
-      //test_insert_case4cComplex();
-      //test_insert_case4dComplex();
+      test_insert_oneRight();
+      test_insert_duplicate();
+      test_insert_keepUnique();
+      test_insertMove_oneLeft();
+      test_insertMove_oneRight();
+      test_insertMove_duplicate();
+      test_insertMove_keepUnique();
+      test_insert_case1();
+      test_insert_case2();
+      test_insert_case3();
+      test_insert_case4aSimple();
+      test_insert_case4bSimple();
+      test_insert_case4cSimple();
+      test_insert_case4dSimple();
+      test_insert_case4aComplex();
+      test_insert_case4bComplex();
+      test_insert_case4cComplex();
+      test_insert_case4dComplex();
 
       // Remove
       test_erase_empty();
