@@ -899,34 +899,34 @@ int BST <T> :: BNode :: computeSize() const
 template <typename T>
 void BST <T> ::BNode::balance()
 {
+   
    // Case 1: if we are the root, then color ourselves black and call it a day.
    if (pParent == nullptr)
    {
       isRed = false;
+      return;
    }
 
    // Case 2: if the parent is black, then there is nothing left to do
-   else if (pParent->isRed == false)
+   if (!pParent->isRed)
    {
-
+      return;
    }
+   
+   // at this point, we know mom exists and is red
+   BNode * pGranny = pParent->pParent; // set granny
+   if (pGranny == nullptr) return; // just in case
+   BNode * pAunt = (pGranny->pLeft == pParent ? pGranny->pRight : pGranny->pLeft); // set aunt
+   
    // Case 3: if the aunt is red, then just recolor
-
-   //else if (pParent->pParent->pLeft->isRed == true)
-   //{
-   //   pParent->isRed = false;
-   //   pParent->pParent->pLeft->isRed = false;
-   //   pParent->pParent->isRed = true;
-   //   pParent->pParent->balance();
-   //}
-
-   //else if (pParent->pParent->pRight->isRed == true)
-   //{
-   //   pParent->isRed = false;
-   //   pParent->pParent->pRight->isRed = false;
-   //   pParent->pParent->isRed = true;
-   //   pParent->pParent->balance();
-   //}
+   if (pAunt && pAunt->isRed)
+   {
+      pParent->isRed = false;
+      pAunt->isRed = false;
+      pGranny->isRed = true;
+      pGranny->balance(); return;
+      return;
+   }
 
    // Case 4: if the aunt is black or non-existant, then we need to rotate
    //else if (pParent->pLeft == nullptr || pParent->pRight == nullptr)
