@@ -282,8 +282,10 @@ BST <T> ::BST()
 template <typename T>
 BST <T> :: BST ( const BST<T>& rhs) 
 {
-   numElements = 99;
-   root = new BNode;
+   root = nullptr;
+   numElements = 0;
+   
+   *this = rhs;
 }
 
 /*********************************************
@@ -293,8 +295,11 @@ BST <T> :: BST ( const BST<T>& rhs)
 template <typename T>
 BST <T> :: BST(BST <T> && rhs) 
 {
-   numElements = 99;
-   root = new BNode;
+   root = rhs.root;
+   numElements = rhs.numElements;
+   
+   rhs.root = nullptr;
+   rhs.numElements = 0;
 }
 
 /*********************************************
@@ -304,8 +309,10 @@ BST <T> :: BST(BST <T> && rhs)
 template <typename T>
 BST <T> ::BST(const std::initializer_list<T>& il)
 {
-   numElements = 99;
-   root = new BNode;
+   root = nullptr;
+   numElements = 0;
+   
+   *this = il;
 }
 
 /*********************************************
@@ -314,7 +321,7 @@ BST <T> ::BST(const std::initializer_list<T>& il)
 template <typename T>
 BST <T> :: ~BST()
 {
-
+   clear();
 }
 
 
@@ -325,6 +332,10 @@ BST <T> :: ~BST()
 template <typename T>
 BST <T> & BST <T> :: operator = (const BST <T> & rhs)
 {
+   clear();
+//   root = copy(rhs);
+   numElements = rhs.numElements;
+   
    return *this;
 }
 
@@ -335,6 +346,9 @@ BST <T> & BST <T> :: operator = (const BST <T> & rhs)
 template <typename T>
 BST <T> & BST <T> :: operator = (const std::initializer_list<T>& il)
 {
+   clear();
+   for (auto t : il)
+      insert(t);
    return *this;
 }
 
@@ -345,6 +359,8 @@ BST <T> & BST <T> :: operator = (const std::initializer_list<T>& il)
 template <typename T>
 BST <T> & BST <T> :: operator = (BST <T> && rhs)
 {
+   clear();
+   swap(rhs);
    return *this;
 }
 
@@ -355,7 +371,13 @@ BST <T> & BST <T> :: operator = (BST <T> && rhs)
 template <typename T>
 void BST <T> :: swap (BST <T>& rhs)
 {
-
+   BNode * tempRoot = rhs.root; // temporarily store root
+   rhs.root = root; // change rhs.root
+   root = tempRoot; // change root
+   
+   size_t tempElements = rhs.numElements; // temporarily store numEls
+   rhs.numElements = numElements; // change root.numEls
+   numElements = tempElements; // change numEls
 }
 
 /*****************************************************
@@ -518,7 +540,11 @@ typename BST<T>::iterator BST<T>::erase(iterator& it)
 template <typename T>
 void BST <T> ::clear() noexcept
 {
-
+   while (!empty())
+   {
+      iterator it = begin(); // make an iterator for the current beginning node
+      erase(it); // erase it
+   }
 }
 
 /*****************************************************
@@ -589,8 +615,7 @@ void BST <T> :: BNode :: addLeft (BNode * pNode)
 {
    pLeft = pNode;
    pNode->pParent = this;
-   numElements++;
-   pNode.balance();
+   pNode->balance();
 }
 
 /******************************************************
@@ -602,8 +627,7 @@ void BST <T> :: BNode :: addRight (BNode * pNode)
 {
    pRight = pNode;
    pNode->pParent = this;
-   numElements++;
-   pNode.balance();
+   pNode->balance();
 }
 
 /******************************************************
@@ -613,13 +637,11 @@ void BST <T> :: BNode :: addRight (BNode * pNode)
 template <typename T>
 void BST<T> :: BNode :: addLeft (const T & t)
 {
-   BNode pNode;
-   pNode.data = t;
+   BNode * pNode = new BNode(t);
    pLeft = pNode;
    pNode->pParent = this;
-   numElements++;
-   pNode.balance();
-} 
+   pNode->balance();
+}
 
 /******************************************************
  * BINARY NODE :: ADD LEFT
@@ -628,12 +650,10 @@ void BST<T> :: BNode :: addLeft (const T & t)
 template <typename T>
 void BST<T> ::BNode::addLeft(T && t)
 {
-   BNode pNode;
-   pNode.data = t;
+   BNode * pNode = new BNode(t);
    pLeft = pNode;
    pNode->pParent = this;
-   numElements++;
-   pNode.balance();
+   pNode->balance();
 }
 
 /******************************************************
@@ -643,12 +663,10 @@ void BST<T> ::BNode::addLeft(T && t)
 template <typename T>
 void BST <T> :: BNode :: addRight (const T & t)
 {
-   BNode pNode;
-   pNode.data = t;
+   BNode * pNode = new BNode(t);
    pRight = pNode;
    pNode->pParent = this;
-   numElements++;
-   pNode.balance();
+   pNode->balance();
 }
 
 /******************************************************
@@ -658,12 +676,10 @@ void BST <T> :: BNode :: addRight (const T & t)
 template <typename T>
 void BST <T> ::BNode::addRight(T && t)
 {
-   BNode pNode;
-   pNode.data = t;
+   BNode * pNode = new BNode(t);
    pRight = pNode;
    pNode->pParent = this;
-   numElements++;
-   pNode.balance();
+   pNode->balance();
 }
 
 #ifdef DEBUG
@@ -866,6 +882,7 @@ typename BST <T> :: iterator & BST <T> :: iterator :: operator ++ ()
    
    // case two: we have no right child and we are our parent's left child
    else if (pNode->pRight == nullptr &&
+            pNode->pParent &&
             pNode->pParent->pLeft == pNode)
    {
       // return the parent
@@ -874,6 +891,7 @@ typename BST <T> :: iterator & BST <T> :: iterator :: operator ++ ()
    
    // case three: we have no right child and we are our parent's right child
    else if (pNode->pRight == nullptr &&
+            pNode->pParent &&
             pNode->pParent->pRight == pNode)
    {
       while (pNode->pParent && pNode->pParent->pRight == pNode)
