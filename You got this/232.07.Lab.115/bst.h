@@ -14,7 +14,7 @@
  *        BST                 : A class that represents a binary search tree
  *        BST::iterator       : An iterator through BST
  * Author
- *    <your names here>
+ *    Katy's Favorites
  ************************************************************************/
 
 #pragma once
@@ -929,14 +929,38 @@ void BST <T> ::BNode::balance()
    }
 
    // Case 4: if the aunt is black or non-existant, then we need to rotate
-   //else if (pParent->pLeft == nullptr || pParent->pRight == nullptr)
-   //{
+   else if (pAunt == nullptr || pAunt->isRed == false)
+   {
+      // Case 4a: We are mom's left and mom is granny's left
+      if (isLeftChild(pParent) && pParent->isLeftChild(pGranny))
+      {
+         // Switches 
+         T copyData = pGranny->data;
+         pGranny->data = pParent->data;
+         pGranny->pRight = pParent;
+         pGranny->pLeft = this;
+         pParent->data = copyData;
+         pParent = pGranny;
+         return;
+      }
 
-   //}
-   // Case 4a: We are mom's left and mom is granny's left
-   // case 4b: We are mom's right and mom is granny's right
-   // Case 4c: We are mom's right and mom is granny's left
-   // case 4d: we are mom's left and mom is granny's right
+      // case 4b: We are mom's right and mom is granny's right
+      else if (isRightChild(pParent) && pParent->isRightChild(pGranny))
+      {
+
+      }
+      // Case 4c: We are mom's right and mom is granny's left
+      else if (isRightChild(pParent) && pParent->isLeftChild(pGranny))
+      {
+
+      }
+      // case 4d: we are mom's left and mom is granny's right
+      else if (isLeftChild(pParent) && pParent->isRightChild(pGranny))
+      {
+
+      }
+   }
+
 }
 
 /*************************************************
