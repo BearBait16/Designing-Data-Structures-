@@ -142,12 +142,12 @@ public:
    BNode()
    {
       pLeft = pRight = pParent = nullptr;
-      isRed = false;
+      isRed = true;
    }
    BNode(const T &  t) : data(t)
    {
       pLeft = pRight = pParent = nullptr;
-      isRed = false;
+      isRed = true;
    }
    BNode(T && t) : data(std::move(t))
    {
@@ -341,10 +341,11 @@ BST <T> :: ~BST()
 template <typename T>
 BST <T> & BST <T> :: operator = (const BST <T> & rhs)
 {
-   copyBinaryTree(rhs.root, this->root);
-   assert(nullptr == this->root || this->root->pParent == nullptr);
-   this->numElements = rhs.numElements;
-   
+   if (this != &rhs)
+   {
+      copyBinaryTree(rhs.root, root);
+      numElements = rhs.numElements;
+   }
    return *this;
 }
 
@@ -435,7 +436,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(const T& t, bool k
          else
          {
             if (node->pRight)
-               node = node->pLeft;
+               node = node->pRight;
             else
             {
                node->addRight(t);
@@ -468,7 +469,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(T&& t, bool keepUn
       if (root == nullptr)
       {
          assert(numElements == 0);
-         root = new BNode(t);
+         root = new BNode(std::move(t));
          root->isRed = false;
          numElements = 1;
          pairReturn.first = iterator(root);
@@ -494,7 +495,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(T&& t, bool keepUn
                node = node->pLeft;
             else
             {
-               node->addLeft(t);
+               node->addLeft(std::move(t));
                done = true;
                pairReturn.first = iterator(node->pLeft);
                pairReturn.second = true;
@@ -504,10 +505,10 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(T&& t, bool keepUn
          else
          {
             if (node->pRight)
-               node = node->pLeft;
+               node = node->pRight;
             else
             {
-               node->addRight(t);
+               node->addRight(std::move(t));
                done = true;
                pairReturn.first = iterator(node->pRight);
                pairReturn.second = true;
@@ -778,7 +779,7 @@ void BST <T> ::copyBinaryTree(const BNode* pSrc, BNode*& pDest)
       pDest->pLeft->pParent = pDest;
    
    copyBinaryTree(pSrc->pRight, pDest->pRight);
-   if (pDest->pRight)
+   if (pSrc->pRight)
       pDest->pRight->pParent = pDest;
 }
 
@@ -865,9 +866,10 @@ void BST<T> :: BNode :: addLeft (const T & t)
 template <typename T>
 void BST<T> ::BNode::addLeft(T && t)
 {
-   BNode* pNode = new BNode(t);
-   addLeft(pNode);
-   pNode->balance();
+   pLeft = new BNode(std::move(t));
+   pLeft->pParent = this;
+   pLeft->isRed = true;
+   pLeft->balance();
 }
 
 /******************************************************
@@ -889,9 +891,10 @@ void BST <T> :: BNode :: addRight (const T & t)
 template <typename T>
 void BST <T> ::BNode::addRight(T && t)
 {
-   BNode* pNode = new BNode(t);
-   addRight(pNode);
-   pNode->balance();
+   pRight = new BNode(std::move(t));
+   pRight->pParent = this;
+   pRight->isRed = true;
+   pRight->balance();
 }
 
 #ifdef DEBUG
@@ -945,7 +948,7 @@ bool BST <T> :: BNode :: verifyRedBlack(int depth) const
    }
    
    // Rule d) Every path from a leaf to the root has the same # of black nodes
-   if (pLeft == nullptr && pRight && nullptr)
+   if (pLeft == nullptr && pRight == nullptr)
       if (depth != 0)
          fReturn = false;
    if (pLeft != nullptr)
@@ -1095,7 +1098,7 @@ void BST <T> ::BNode::balance()
    {
       assert(pGranny->pRight == pAunt);
       assert(pParent->pLeft == pSibling);
-      assert(pGranny->isRed == true);
+      assert(pParent->isRed == true);
       
       pGranny->addLeft(this->pRight);
       pParent->addRight(this->pLeft);
@@ -1111,7 +1114,7 @@ void BST <T> ::BNode::balance()
    {
       assert(pGranny->pLeft == pAunt);
       assert(pParent->pRight == pSibling);
-      assert(pGranny->isRed == true);
+      assert(pParent->pRight == pSibling);
       
       pGranny->addRight(this->pLeft);
       pParent->addLeft(this->pRight);
