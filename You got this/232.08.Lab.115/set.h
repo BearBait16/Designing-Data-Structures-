@@ -49,18 +49,22 @@ public:
    }
    set(const set &  rhs)
    { 
+      bst = rhs.bst;
    }
    set(set && rhs) 
    { 
+      bst = rhs.bst;                                                                                   
    }
-   set(const std::initializer_list <T> & il) 
+   set(const std::initializer_list <T> & il) : bst(il)
    {
+
    }
    template <class Iterator>
    set(Iterator first, Iterator last) 
    {
+
    }
-  ~set() { }
+   ~set() { bst.clear(); }
 
    //
    // Assign
@@ -109,11 +113,11 @@ public:
    //
    bool empty() const noexcept 
    { 
-      return true;    
+      return bst.size() == 0;    
    }
    size_t size() const noexcept 
    { 
-      return 99;     
+      return bst.size();     
    }
 
    //
