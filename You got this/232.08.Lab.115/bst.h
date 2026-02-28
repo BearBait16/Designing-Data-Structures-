@@ -407,7 +407,7 @@ std::pair<typename BST <T> ::iterator, bool> BST <T> ::insert(const T& t, bool k
          pairReturn.second = true;
          return pairReturn;
       }
-      
+
       BNode* node = root;
       bool done = false;
       

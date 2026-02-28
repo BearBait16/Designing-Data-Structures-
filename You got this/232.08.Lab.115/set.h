@@ -137,16 +137,20 @@ public:
    //
    std::pair<iterator, bool> insert(const T& t)
    {
-      std::pair<iterator, bool> p(iterator(), true);
+      std::pair<iterator, bool> p = bst.insert(t, true);
       return p;
    }
    std::pair<iterator, bool> insert(T&& t)
    {
-      std::pair<iterator, bool> p(iterator(), true);
+      std::pair<iterator, bool> p = bst.insert(std::move(t), true);
       return p;
    }
    void insert(const std::initializer_list <T>& il)
    {
+      for (const T& t : il)
+      {
+         bst.insert(t, true);
+      }
    }
    template <class Iterator>
    void insert(Iterator first, Iterator last)
