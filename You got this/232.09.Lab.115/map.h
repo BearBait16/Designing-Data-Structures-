@@ -57,9 +57,11 @@ public:
    }
    map(const map &  rhs) 
    { 
+      bst = rhs.bst;
    }
    map(map && rhs) 
    { 
+      bst = rhs.bst;
    }
    template <class Iterator>
    map(Iterator first, Iterator last) 
@@ -94,11 +96,11 @@ public:
    class iterator;
    iterator begin() 
    { 
-      return iterator();
+      return bst.begin();
    }
    iterator end() 
    { 
-      return iterator();    
+      return bst.end();    
    }
 
    // 
