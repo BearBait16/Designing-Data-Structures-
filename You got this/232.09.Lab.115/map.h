@@ -81,14 +81,20 @@ public:
    //
    map & operator = (const map & rhs) 
    {
+      bst = rhs.bst;
       return *this;
    }
    map & operator = (map && rhs)
    {
+      clear();
+      bst.swap(rhs.bst);
       return *this;
    }
    map & operator = (const std::initializer_list <Pairs> & il)
    {
+      clear();
+      for (auto& element : il)
+         insert(element);
       return *this;
    }
    
@@ -235,18 +241,24 @@ public:
    //
    iterator & operator ++ ()
    {
+      ++it;
       return *this;
    }
    iterator operator ++ (int postfix)
    {
+      iterator temp (*this);
+      ++it;
       return *this;
    }
    iterator & operator -- ()
    {
+      --it;
       return *this;
    }
    iterator  operator -- (int postfix)
    {
+      iterator temp (*this);
+      --it;
       return *this;
    }
 
@@ -304,6 +316,7 @@ const V& map <K, V> ::at(const K& key) const
 template <typename K, typename V>
 void swap(map <K, V>& lhs, map <K, V>& rhs)
 {
+   lhs.bst.swap(rhs.bst);
 }
 
 /*****************************************************
