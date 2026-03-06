@@ -61,14 +61,16 @@ public:
    }
    map(map && rhs) 
    { 
-      bst = rhs.bst;
+      bst = std::move(rhs.bst);
    }
    template <class Iterator>
    map(Iterator first, Iterator last) 
    {
+      insert(first, last);
    }
    map(const std::initializer_list <Pairs>& il) 
    {
+      insert(il);
    }
   ~map()         
    {
@@ -96,11 +98,11 @@ public:
    class iterator;
    iterator begin() 
    { 
-      return bst.begin();
+      return iterator (bst.begin());
    }
    iterator end() 
    { 
-      return bst.end();    
+      return iterator (bst.end());
    }
 
    // 
@@ -112,7 +114,7 @@ public:
          V & at (const K& k);
    iterator find(const K & k)
    {
-      return iterator();
+      return iterator(bst.find(k));
    }
 
    //
@@ -120,19 +122,27 @@ public:
    //
    custom::pair<typename map::iterator, bool> insert(Pairs && rhs)
    {
-      return make_pair(iterator(), true);
+      auto result = bst.insert(std::move(rhs));
+      return make_pair(iterator(result.first), result.second);
    }
    custom::pair<typename map::iterator, bool> insert(const Pairs & rhs)
    {
-      return make_pair(iterator(), true);
+      auto result = bst.insert(rhs);
+      return make_pair(iterator(result.first), result.second);
    }
 
    template <class Iterator>
    void insert(Iterator first, Iterator last)
    {
+      for (auto it = first; it != last; ++it)
+         bst.insert(*it);
    }
    void insert(const std::initializer_list <Pairs>& il)
    {
+      for (auto& element : il)
+      {
+         bst.insert(element);
+      }
    }
 
    //
@@ -140,6 +150,7 @@ public:
    //
    void clear() noexcept
    {
+      bst.clear();
    }
    size_t erase(const K& k);
    iterator erase(iterator it);
@@ -150,11 +161,11 @@ public:
    //
    bool empty() const noexcept 
    { 
-      return true; 
+      return bst.empty();
    }
    size_t size() const noexcept 
    { 
-      return 99;
+      return bst.size();
    }
 
 
@@ -183,11 +194,11 @@ public:
    iterator()
    {
    }
-   iterator(const typename BST < pair <K, V> > :: iterator & rhs)
-   { 
+   iterator(const typename BST < pair <K, V> > :: iterator & rhs) : it(rhs)
+   {
    }
-   iterator(const iterator & rhs) 
-   { 
+   iterator(const iterator & rhs) : it(rhs.it)
+   {
    }
 
    //
@@ -195,6 +206,7 @@ public:
    //
    iterator & operator = (const iterator & rhs)
    {
+      this->it = rhs.it;
       return *this;
    }
 
@@ -203,11 +215,11 @@ public:
    //
    bool operator == (const iterator & rhs) const 
    { 
-      return true;
+      return this->it == rhs.it;
    }
    bool operator != (const iterator & rhs) const 
    { 
-      return true;
+      return this->it != rhs.it;
    }
 
    // 
@@ -215,7 +227,7 @@ public:
    //
    const pair <K, V> & operator * () const
    {
-      return *(new pair<K, V>);
+      return *it;
    }
 
    //
@@ -301,7 +313,20 @@ void swap(map <K, V>& lhs, map <K, V>& rhs)
 template <typename K, typename V>
 size_t map<K, V>::erase(const K& k)
 {
-   return size_t(99);
+   // create a temporary pair
+//   Pairs pair(k, V());
+   
+   // find the element
+   iterator it = find(k);
+   
+   // check if it's at the end
+   if (it == end())
+      return 0; // at the end, wasnt found
+   
+   // erase it! (literally)
+   erase(it);
+   
+   return 1; // only one was removed
 }
 
 /*****************************************************
@@ -311,7 +336,10 @@ size_t map<K, V>::erase(const K& k)
 template <typename K, typename V>
 typename map<K, V>::iterator map<K, V>::erase(map<K, V>::iterator first, map<K, V>::iterator last)
 {
-   return iterator();
+   while (first != last)
+      // while first isn't last, erase the first element
+      first = erase(first);
+   return last;
 }
 
 /*****************************************************
@@ -321,7 +349,7 @@ typename map<K, V>::iterator map<K, V>::erase(map<K, V>::iterator first, map<K, 
 template <typename K, typename V>
 typename map<K, V>::iterator map<K, V>::erase(map<K, V>::iterator it)
 {
-   return iterator();
+   return iterator(bst.erase(it.it));
 }
 
 }; //  namespace custom
