@@ -72,23 +72,23 @@ public:
       test_iterator_dereference_standardRead();
 
       // Access
-      test_access_standardRootRead();
-      test_access_standardLeftRead();
-      test_access_standardRightRead();
-      test_access_standardRootWrite();
-      test_access_standardLeftWrite();
-      test_access_standardRightWrite();
-      test_access_emptyWrite();
-      test_access_standardFrontInsert();
-      test_access_standardMiddleInsert();
-      test_at_standardRootRead();
-      test_at_standardLeftRead();
-      test_at_standardRightRead();
-      test_at_standardRootWrite();
-      test_at_standardLeftWrite();
-      test_at_standardRightWrite();
-      test_at_emptyWrite();
-      test_at_standardWrite();
+      test_access_standardRootRead(); //
+      test_access_standardLeftRead(); //
+      test_access_standardRightRead(); //
+      test_access_standardRootWrite(); //
+      test_access_standardLeftWrite(); //
+      test_access_standardRightWrite(); //
+      test_access_emptyWrite(); //
+      test_access_standardFrontInsert(); //
+      test_access_standardMiddleInsert(); //
+      test_at_standardRootRead(); //
+      test_at_standardLeftRead(); //
+      test_at_standardRightRead(); //
+      test_at_standardRootWrite(); //
+      test_at_standardLeftWrite(); //
+      test_at_standardRightWrite(); //
+      test_at_emptyWrite(); //
+      test_at_standardWrite(); //
       test_find_empty();
       test_find_standardRoot();
       test_find_standardLeft();

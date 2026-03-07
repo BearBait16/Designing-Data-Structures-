@@ -120,7 +120,7 @@ public:
          V & at (const K& k);
    iterator find(const K & k)
    {
-      return iterator(bst.find(k));
+      return iterator(bst.find(Pairs(k)));
    }
 
    //
@@ -276,7 +276,16 @@ private:
 template <typename K, typename V>
 V& map <K, V> :: operator [] (const K& key)
 {
-   return *(new V);
+   Pairs p(key);
+
+   auto it = bst.find(p);
+
+   // If the element doesn't exist, insert it with a default value
+   if (it == bst.end())
+      it = bst.insert(p).first;
+
+   // Return the value
+   return const_cast<V&>((*it).second);
 }
 
 /*****************************************************
@@ -286,7 +295,7 @@ V& map <K, V> :: operator [] (const K& key)
 template <typename K, typename V>
 const V& map <K, V> :: operator [] (const K& key) const
 {
-   return *(new V);
+   return at(key);
 }
 
 /*****************************************************
@@ -296,7 +305,13 @@ const V& map <K, V> :: operator [] (const K& key) const
 template <typename K, typename V>
 V& map <K, V> ::at(const K& key)
 {
-   return *(new V);
+   // Find the element in the BST
+   auto it = bst.find(Pairs(key));
+
+   if (it == bst.end())
+      throw std::out_of_range("invalid map<K, T> key");
+
+   return const_cast<V&>((*it).second);
 }
 
 /*****************************************************
@@ -306,7 +321,13 @@ V& map <K, V> ::at(const K& key)
 template <typename K, typename V>
 const V& map <K, V> ::at(const K& key) const
 {
-   return *(new V);
+   // Find the element in the BST
+   auto it = bst.find(Pairs(key));
+
+   if (it == bst.end())
+      throw std::out_of_range("invalid map<K, T> key");
+
+   return (*it).second;
 }
 
 /*****************************************************
