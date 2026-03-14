@@ -36,16 +36,16 @@ public:
       test_constructCopy_standard();
       test_constructMove_empty();
       test_constructMove_standard();
-      //test_constructRange_empty();
-      //test_constructRange_one();
-      //test_constructRange_staandard();
-      //test_constructMoveInit_empty();
-      //test_constructMoveInit_one();
-      //test_constructMoveInit_standard();
-      //test_constructMoveInit_twoLevels();
-      //test_destructor_empty();
-      //test_destructor_standard();
-      //test_destructor_partiallyFilled();
+      test_constructRange_empty();
+      test_constructRange_one();
+      test_constructRange_staandard();
+      test_constructMoveInit_empty();
+      test_constructMoveInit_one();
+      test_constructMoveInit_standard();
+      test_constructMoveInit_twoLevels();
+      test_destructor_empty();
+      test_destructor_standard();
+      test_destructor_partiallyFilled();
       
       // Assign
       test_swap_emptyEmpty();
@@ -54,8 +54,8 @@ public:
       test_swap_standardStandard();
 
       // Access
-      //test_top_empty();
-      //test_top_standard();
+      test_top_empty();
+      test_top_standard();
 
       // Insert
       test_push_empty();
@@ -70,11 +70,11 @@ public:
       test_pushMove_levelThree();
 
       // Remove
-      //test_pop_empty();
-      //test_pop_one();
-      //test_pop_two();
-      //test_pop_three();
-      //test_pop_standard();
+      test_pop_empty();
+      test_pop_one();
+      test_pop_two();
+      test_pop_three();
+      test_pop_standard();
 
       // Status
       test_size_empty();
@@ -89,9 +89,9 @@ public:
       test_percolateDown_nothingReversed();
       test_percolateDown_oneLevelReversed();
       test_percolateDown_twoLevelsReversed();
-      //test_heapify_nothing();
-      //test_heapify_oneLevel();
-      //test_heapify_twoLevels();
+      test_heapify_nothing();
+      test_heapify_oneLevel();
+      test_heapify_twoLevels();
 
       report("PQueue");
    }
