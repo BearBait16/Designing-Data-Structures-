@@ -14,7 +14,7 @@
  *    This will contain the class definition of:
  *        priority_queue          : A class that represents a Priority Queue
  * Author
- *    <your names here>
+ *    Katy's Favorites
  ************************************************************************/
 
 #pragma once
@@ -139,6 +139,7 @@ void priority_queue <T, Container, Compare> :: push(const T & t)
 template <class T, class Container, class Compare>
 void priority_queue <T, Container, Compare> :: push(T && t)
 {
+
 }
 
 /************************************************
@@ -150,6 +151,25 @@ void priority_queue <T, Container, Compare> :: push(T && t)
 template <class T, class Container, class Compare>
 bool priority_queue <T, Container, Compare> :: percolateDown(size_t indexHeap)
 {
+   // Find the children of the index
+   size_t indexLeft =  (2 * indexHeap) + 1;
+   size_t indexRight = (1 + indexLeft) + 1;
+
+   // Check if the left kid could even exsist
+   if (indexLeft > size() - 1)
+   {
+      return false;
+   }
+
+   // Figure out which child is bigger
+   size_t biggestChild = (indexRight < size() && container[indexLeft] < container[indexRight]) ? indexRight: indexLeft;
+
+   if (container[indexHeap] < container[biggestChild])
+   {
+      std::swap(container[indexHeap], container[biggestChild]);
+      percolateDown(biggestChild);
+      return true;
+   }
    return false;
 }
 
