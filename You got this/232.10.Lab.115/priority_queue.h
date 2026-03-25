@@ -138,6 +138,12 @@ const T & priority_queue <T, Container, Compare> :: top() const
 template <class T, class Container, class Compare>
 void priority_queue <T, Container, Compare> :: pop()
 {
+   if (!empty())
+   {
+      swap(container.front(), container.back());
+      container.pop_back();
+      percolateDown(1);
+   }
 }
 
 /*****************************************
@@ -155,7 +161,10 @@ void priority_queue <T, Container, Compare> :: push(const T & t)
 template <class T, class Container, class Compare>
 void priority_queue <T, Container, Compare> :: push(T && t)
 {
-   container.push_back(t);
+   container.push_back(std::move(t));
+   size_t index = container.size() / 2;
+   while (index && percolateDown(index))
+      index = index / 2;
 }
 
 /************************************************
