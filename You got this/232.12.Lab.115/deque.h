@@ -14,7 +14,7 @@
  *        deque                 : A class that represents a deque
  *        deque::iterator       : An iterator through a deque
  * Author
- *    <your names here>
+ *    Katy's Favourites
  ************************************************************************/
 
 #pragma once
@@ -41,7 +41,8 @@ public:
    // Construct
    //
    deque(const A & a = A()) 
-   { data = nullptr;
+   {
+      data = nullptr;
    }
    deque(deque & rhs);
    ~deque()
