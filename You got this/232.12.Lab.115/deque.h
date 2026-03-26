@@ -22,6 +22,7 @@
 // Debug stuff
 #include <cassert>
 #include <memory>   // for std::allocator
+#include <iostream>
 
 class TestDeque;    // forward declaration for TestDeque unit test class
 
@@ -40,9 +41,8 @@ public:
    // 
    // Construct
    //
-   deque(const A & a = A()) 
+   deque(const A & a = A()) : numBlocks(0), numCells(16), numElements(0), iaFront(0), data(nullptr)
    {
-      data = nullptr;
    }
    deque(deque & rhs);
    ~deque()
@@ -71,28 +71,40 @@ public:
    // Access
    //
    T & front()       
-   { 
-      return *(new T);
+   {
+      assert(numElements != 0);
+      assert (nullptr != data[ibFromID(0)]);
+      return data[ibFromID(0)][icFromID(0)];
    }
    const T & front() const 
    {
-      return *(new T);
+      assert(numElements != 0);
+      assert (nullptr != data[ibFromID(0)]);
+      return data[ibFromID(0)][icFromID(0)];
    }
    T & back()
    {
-      return *(new T);
+      assert(numElements != 0);
+      assert (nullptr != data[ibFromID(numElements - 1)]);
+      return data[ibFromID(numElements - 1)][icFromID(numElements - 1)];
    }
    const T & back() const
    {
-      return *(new T);
+      assert(numElements != 0);
+      assert (nullptr != data[ibFromID(numElements - 1)]);
+      return data[ibFromID(numElements - 1)][icFromID(numElements - 1)];
    }
    T & operator[](int id)
    {
-      return *(new T);
+      assert(0 <= id && id < numElements);
+      assert(nullptr != data[ibFromID(id)]);
+      return data[ibFromID(id)][icFromID(id)];
    }
    const T & operator[](int id) const
    {
-      return *(new T);
+      assert(0 <= id && id < numElements);
+      assert(nullptr != data[ibFromID(id)]);
+      return data[ibFromID(id)][icFromID(id)];
    }
 
    //
@@ -120,19 +132,31 @@ private:
    // array index from deque index
    int iaFromID(int id) const
    {
-      return -1;
+      std::cout << "checking id: " << id << std::endl;
+      std::cout << "numElements: " << numElements << std::endl;
+      assert(0 <= id && id <= numElements);
+      assert(0 <= iaFront && iaFront < (numCells * numBlocks));
+      int ia = (id + iaFront) % (numCells * numBlocks);
+      assert((0 <= ia) && ia < numCells * numBlocks);
+      return ia;
    }
 
    // block index from deque index
    int ibFromID(int id) const
    {
-      return -1;
+      std::cout << "in ibFromID" << std::endl;
+      int ib = iaFromID(id) / numCells;
+      assert(0 <= ib && ib < numBlocks);
+      return ib;
    }
 
    // cell index from deque index
    int icFromID(int id) const
    {
-      return -1;
+      std::cout << "in icFromID" << std::endl;
+      int ic = iaFromID(id) % numCells;
+      assert(0 <= ic && ic < numCells);
+      return ic;
    }
 
    // reallocate
@@ -202,27 +226,34 @@ public:
    //
    int operator - (iterator it) const
    {
-      return 99;
+      return this->id - it.id;
    }
    iterator& operator += (int offset)
    {
+      id += offset;
       return *this;
    }
    iterator& operator ++ ()
    {
+      ++id;
       return *this;
    }
    iterator operator ++ (int postfix)
    {
-      return *this;
+      iterator temp = *this;
+      this->id++;
+      return temp;
    }
    iterator& operator -- ()
    {
+      --id;
       return *this;
    }
    iterator operator -- (int postfix)
    {
-      return *this;
+      iterator temp = *this;
+      this->id--;
+      return temp;
    }
 
 private:
@@ -236,8 +267,14 @@ private:
  * call the copy constructor on each element
  ****************************************/
 template <typename T, typename A>
-deque <T, A> ::deque(deque& rhs) 
+deque <T, A> ::deque(deque& rhs) :
+data(nullptr),
+    numBlocks(0),
+    numCells(16),
+    numElements(0),
+    iaFront(0)
 {
+   *this = rhs;
 }
 
 /*****************************************
@@ -248,6 +285,9 @@ deque <T, A> ::deque(deque& rhs)
 template <typename T, typename A>
 deque <T, A> & deque <T, A> :: operator = (deque & rhs)
 {
+   this->clear();
+//   for (auto it = rhs.begin(); it != rhs.end(); ++it)
+//      this->push_back(*it);
    return *this;
 }
 
@@ -258,6 +298,11 @@ deque <T, A> & deque <T, A> :: operator = (deque & rhs)
 template <typename T, typename A>
 void deque <T, A> ::push_back(const T& t)
 {
+//   int numCapacity = numBlocks * numCells;
+//   if (numElements == numCapacity)
+//      reallocate(numCapacity * 2);
+//   std::cout << "numElements before iaFromID call: " << numElements << std::endl;
+//   data[iaFromID(numElements++)];
 }
 
 /*****************************************
@@ -276,6 +321,22 @@ void deque <T, A> ::push_back(T && t)
 template <typename T, typename A>
 void deque <T, A> ::push_front(const T& t)
 {
+   int numCapacity = numBlocks * numCells;
+      if (numElements == numCapacity)
+         reallocate(numCapacity * 2);
+
+      iaFront--;
+      if (iaFront < 0)
+         iaFront = numCapacity - 1;
+      
+      // 1. Calculate the 2D coordinates
+      int block = iaFront / numCells;
+      int cell = iaFront % numCells;
+
+      // 2. Assign the value to the exact cell within the block
+      data[block][cell] = t;
+      
+      numElements++;
 }
 
 /*****************************************
@@ -321,6 +382,42 @@ void deque <T, A> ::pop_back()
 template <typename T, typename A>
 void deque <T, A> :: reallocate(int numBlocksNew)
 {
+   // allocate new array of pointers
+   T** dataNew = new T*[numBlocksNew];
+   
+   // copy over pointers and unwrap as we go
+   int ibNew = 0;
+   for (int ibOld = 0; ibOld < numElements; ibOld += numCells)
+   {
+      dataNew[ibNew] = data[ibFromID(ibOld)];
+      ibNew++;
+   }
+   
+   // set block pointers to null if there are no blokcs
+   while (ibNew < numBlocksNew)
+   {
+      dataNew[ibNew] = nullptr;
+      ibNew++;
+   }
+   
+   // if the back element is on the front element's block, move it
+   if (numElements > 0 &&
+       ibFromID(0) == ibFromID(numElements - 1) &&
+       icFromID(0) > icFromID(numElements - 1))
+   {
+//      int ibFrontOld = ibFromID(0);
+      int ibBackOld = ibFromID(numElements - 1);
+      int ibBackNew = numElements / numCells;
+      dataNew[ibBackNew] = new T[numCells];
+      for (int ic = 0; ic <= icFromID(numElements - 1); ic++)
+         dataNew[ibBackNew][ic] = std::move(data[ibBackOld][ic]);
+   }
+      
+   // change the deque's member variables with new values
+   if (data) delete[] data;
+   data = dataNew;
+   numBlocks = numBlocksNew;
+   iaFront = iaFront % numCells;
 }
 
 
