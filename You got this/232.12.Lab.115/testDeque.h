@@ -44,49 +44,49 @@ public:
       // Construct
       test_construct_default();
       test_constructCopy_empty();
-//      test_constructCopy_standard();
-//      test_constructCopy_wrapped();
+      test_constructCopy_standard();
+      test_constructCopy_wrapped();
       
       // Destruct
-//      test_destruct_default();
-//      test_destruct_emptyBlock();
-//      test_destruct_fullBlock();
-//      test_destruct_partBlock();
-//      test_destruct_twoBlock();
-//      test_destruct_standard();
+      test_destruct_default();
+      test_destruct_emptyBlock();
+      test_destruct_fullBlock();
+      test_destruct_partBlock();
+      test_destruct_twoBlock();
+      test_destruct_standard();
 
       // Assign
-//      test_assign_emptyToEmpty();
-//      test_assign_emptyToStandard();
-//      test_assign_standardToStandard();
-//      test_assign_standardToEmpty();
-//      test_assign_wrapped();
+      test_assign_emptyToEmpty();
+      test_assign_emptyToStandard();
+      test_assign_standardToStandard();
+      test_assign_standardToEmpty();
+      test_assign_wrapped();
 
       // Iterator
-//      test_iterator_begin_empty();
-//      test_iterator_begin_standard();
-//      test_iterator_end_standard();
-//      test_iterator_increment_standardMiddle();
-//      test_iterator_dereference_read();
-//      test_iterator_dereference_update();
-//      test_iterator_add_withinBlock();
-//      test_iterator_add_betweenBlocks();
-//      test_iterator_difference_standard();
+      test_iterator_begin_empty();
+      test_iterator_begin_standard();
+      test_iterator_end_standard();
+      test_iterator_increment_standardMiddle();
+      test_iterator_dereference_read();
+      test_iterator_dereference_update();
+      test_iterator_add_withinBlock();
+      test_iterator_add_betweenBlocks();
+      test_iterator_difference_standard();
 
       // Access
-//      test_back_readStandard();
-//      test_back_readWrapped();
-//      test_back_readReadOnly();
-//      test_back_writeStandard();
-//      test_back_writeWrapped();
-//      test_front_readStandard();
-//      test_front_writeStandard();
-//      test_front_readReadOnly();
-//      test_subscript_readStandard();
-//      test_subscript_readWrapped();
-//      test_subscript_readReadOnly();
-//      test_subscript_writeStandard();
-//      test_subscript_writeWrapped();
+      test_back_readStandard();
+      test_back_readWrapped();
+      test_back_readReadOnly();
+      test_back_writeStandard();
+      test_back_writeWrapped();
+      test_front_readStandard();
+      test_front_writeStandard();
+      test_front_readReadOnly();
+      test_subscript_readStandard();
+      test_subscript_readWrapped();
+      test_subscript_readReadOnly();
+      test_subscript_writeStandard();
+      test_subscript_writeWrapped();
 
       // Insert
       test_pushback_empty();
@@ -102,24 +102,24 @@ public:
       test_pushfront_bigWrap();
 
       // Remove
-//      test_clear_empty();
-//      test_clear_standard();
-//      test_popfront_unwrap();
-//      test_popfront_standard();
-//      test_popfront_lastElement();
-//      test_popfront_lastInBlock(); 
-//      test_popfront_complex();
-//      test_popback_unwrap();
-//      test_popback_standard();
-//      test_popback_lastElement();
-//      test_popback_lastInBlock();
-//      test_popback_complex();
+      test_clear_empty();
+      test_clear_standard();
+      test_popfront_unwrap();
+      test_popfront_standard();
+      test_popfront_lastElement();
+      test_popfront_lastInBlock(); 
+      test_popfront_complex();
+      test_popback_unwrap();
+      test_popback_standard();
+      test_popback_lastElement();
+      test_popback_lastInBlock();
+      test_popback_complex();
 
       // Status
-//      test_size_empty();
-//      test_size_standard();
-//      test_empty_empty();
-//      test_empty_standard();
+      test_size_empty();
+      test_size_standard();
+      test_empty_empty();
+      test_empty_standard();
 
 
       report("Deque");
@@ -1943,9 +1943,6 @@ public:
       //                      +----+----+
       //                      |    |    |
       //                      +----+----+
-      std::cout << "iaFront: " << d.iaFront << std::endl;
-      std::cout << "numBlocks: " << d.numBlocks << std::endl;
-      std::cout << "data[1]: " << d.data[1] << std::endl;
       assertUnit(d.numElements == 3);
       assertUnit(d.iaFront == 7);
       assertUnit(d.numBlocks == 2);

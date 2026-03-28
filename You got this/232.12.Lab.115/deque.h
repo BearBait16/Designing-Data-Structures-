@@ -125,8 +125,8 @@ public:
    //
    // Status
    //
-   size_t size()  const { return 99; }
-   bool   empty() const { return false; }
+   size_t size()  const { return numElements; }
+   bool   empty() const { return numElements == 0; }
    
 private:
    // array index from deque index
@@ -281,9 +281,15 @@ data(nullptr),
 template <typename T, typename A>
 deque <T, A> & deque <T, A> :: operator = (deque & rhs)
 {
-   this->clear();
-//   for (auto it = rhs.begin(); it != rhs.end(); ++it)
-//      this->push_back(*it);
+   // swap everything
+   std::swap(data, rhs.data);
+   std::swap(iaFront, rhs.iaFront);
+   std::swap(numElements, rhs.numElements);
+   std::swap(numBlocks, rhs.numBlocks);
+   std::swap(numCells, rhs.numCells);
+   
+   // clear
+   rhs.clear();
    return *this;
 }
 
@@ -323,9 +329,12 @@ void deque <T, A> ::push_back(T && t)
 template <typename T, typename A>
 void deque <T, A> ::push_front(const T& t)
 {
-   //    reallocate as needed
-   if (iaFront + numElements >= numBlocks * numCells)
-      reallocate(((int)numBlocks == 0) ? 1 : (int)numBlocks * 2);
+   // reallocate as needed
+   if (numElements == numBlocks * numCells ||
+         (numElements > 0 &&
+          ((iaFront == 0 ? numBlocks * numCells - 1 : iaFront - 1) / numCells) == ibFromID((int)numElements - 1) &&
+          ((iaFront == 0 ? numBlocks * numCells - 1 : iaFront - 1) % numCells) > icFromID((int)numElements - 1)))
+         reallocate(((int)numBlocks == 0) ? 1 : (int)numBlocks * 2);
    
    // adjust the front array index and wrap if needed
    if (iaFront != 0)
