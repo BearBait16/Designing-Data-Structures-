@@ -47,6 +47,13 @@ public:
    deque(deque & rhs);
    ~deque()
    {
+      clear();
+
+      if (data)
+      {
+         delete[] data;
+         data = nullptr;
+      }
    }
 
    //
@@ -60,11 +67,11 @@ public:
    class iterator;
    iterator begin() 
    { 
-      return iterator(); 
+      return iterator(0, this); 
    }
    iterator end()   
    { 
-      return iterator(); 
+      return iterator((int)numElements, this); 
    }
 
    // 
@@ -185,13 +192,13 @@ public:
    // 
    // Construct
    //
-   iterator() 
+   iterator() :id(0), d(nullptr)
    {
    }
    iterator(int id, deque* d) : id(id), d(d)
    {
    }
-   iterator(const iterator& rhs)
+   iterator(const iterator& rhs) : id(rhs.id), d(rhs.d)
    {
    }
 
@@ -200,21 +207,26 @@ public:
    //
    iterator& operator = (const iterator& rhs)
    {
+      if (this != &rhs)
+      {
+         id = rhs.id;
+         d = rhs.d;
+      }
       return *this;
    }
 
    // 
    // Compare
    //
-   bool operator != (const iterator& rhs) const { return true; }
-   bool operator == (const iterator& rhs) const { return true; }
+   bool operator != (const iterator& rhs) const { return !(*this == rhs); }
+   bool operator == (const iterator& rhs) const { return id == rhs.id && d == rhs.d; }
 
    // 
    // Access
    //
    T& operator * ()
    {
-      return *(new T);
+      return (*d)[id];
    }
 
    // 
@@ -270,7 +282,29 @@ data(nullptr),
     numElements(0),
     iaFront(0)
 {
-   *this = rhs;
+   if (rhs.numElements == 0)
+      return;
+
+   // allocate enough blocks for all elements (contiguous)
+   numBlocks = (rhs.numElements - 1) / numCells + 1;
+   data = new T * [numBlocks];
+
+   for (size_t i = 0; i < numBlocks; i++)
+      data[i] = nullptr;
+
+   // copy elements
+   for (size_t i = 0; i < rhs.numElements; i++)
+   {
+      int ib = i / numCells;
+      int ic = i % numCells;
+
+      if (data[ib] == nullptr)
+         data[ib] = alloc.allocate(numCells);
+
+      alloc.construct(&data[ib][ic], rhs[i]); // COPY happens here
+   }
+
+   numElements = rhs.numElements;
 }
 
 /*****************************************
@@ -281,15 +315,30 @@ data(nullptr),
 template <typename T, typename A>
 deque <T, A> & deque <T, A> :: operator = (deque & rhs)
 {
-   // swap everything
-   std::swap(data, rhs.data);
-   std::swap(iaFront, rhs.iaFront);
-   std::swap(numElements, rhs.numElements);
-   std::swap(numBlocks, rhs.numBlocks);
-   std::swap(numCells, rhs.numCells);
-   
-   // clear
-   rhs.clear();
+   if (this == &rhs)
+      return *this;
+
+   size_t i = 0;
+
+   // assign into existing elements
+   for (; i < numElements && i < rhs.numElements; i++)
+   {
+      (*this)[i] = rhs[i];
+   }
+
+   // if LHS has extra -> remove them
+   while (numElements > rhs.numElements)
+   {
+      pop_back();
+   }
+
+   // if RHS has extra -> add them
+   while (i < rhs.numElements)
+   {
+      push_back(rhs[i]);
+      i++;
+   }
+
    return *this;
 }
 
@@ -320,6 +369,17 @@ void deque <T, A> ::push_back(const T& t)
 template <typename T, typename A>
 void deque <T, A> ::push_back(T && t)
 {
+   if (numElements + iaFront >= numBlocks * numCells)
+      reallocate((numBlocks == 0) ? 1 : numBlocks * 2);
+
+   int ib = ibFromID((int)numElements);
+   int ic = icFromID((int)numElements);
+
+   if (data[ib] == nullptr)
+      data[ib] = alloc.allocate(numCells);
+
+   alloc.construct(&data[ib][ic], std::move(t));
+   numElements++;
 }
 
 /*****************************************
@@ -359,6 +419,27 @@ void deque <T, A> ::push_front(const T& t)
 template <typename T, typename A>
 void deque <T, A> ::push_front(T&& t)
 {
+   // reallocate as needed
+   if (numElements == numBlocks * numCells ||
+      (numElements > 0 &&
+         ((iaFront == 0 ? numBlocks * numCells - 1 : iaFront - 1) / numCells) == ibFromID((int)numElements - 1) &&
+         ((iaFront == 0 ? numBlocks * numCells - 1 : iaFront - 1) % numCells) > icFromID((int)numElements - 1)))
+      reallocate(((int)numBlocks == 0) ? 1 : (int)numBlocks * 2);
+
+   // adjust the front array index and wrap if needed
+   if (iaFront != 0)
+      iaFront--;
+   else
+      iaFront = (int)numBlocks * (int)numCells - 1;
+
+   // allocate as needed
+   int ib = ibFromID(0); // get ib
+   int ic = icFromID(0); // get ic
+   if (data[ib] == nullptr)
+      data[ib] = alloc.allocate(numCells);
+
+   alloc.construct(&data[ib][ic], std::move(t));
+   numElements++;
 }
 
 /*****************************************
@@ -368,6 +449,27 @@ void deque <T, A> ::push_front(T&& t)
 template <typename T, typename A>
 void deque <T, A> ::clear()
 {
+   // destroy all elements
+   for (size_t i = 0; i < numElements; i++)
+   {
+      int ib = ibFromID((int)i);
+      int ic = icFromID((int)i);
+
+      alloc.destroy(&data[ib][ic]);  // calls destructor
+   }
+
+   // deallocate all blocks
+   for (size_t ib = 0; ib < numBlocks; ib++)
+   {
+      if (data && data[ib])
+      {
+         alloc.deallocate(data[ib], numCells);
+         data[ib] = nullptr;
+      }
+   }
+
+   numElements = 0;
+   iaFront = 0;
 }
 
 /*****************************************
@@ -375,8 +477,46 @@ void deque <T, A> ::clear()
  * Remove the front element from a deque
  ****************************************/
 template <typename T, typename A>
-void deque <T, A> :: pop_front()
+void deque <T, A> ::pop_front()
 {
+   assert(numElements > 0);
+
+   int ib = ibFromID(0);
+   int ic = icFromID(0);
+
+   // destroy front element
+   alloc.destroy(&data[ib][ic]);
+
+   numElements--;
+
+   // CASE: last element removed
+   if (numElements == 0)
+   {
+      alloc.deallocate(data[ib], numCells);
+      data[ib] = nullptr;
+      iaFront = 0;
+      return;
+   }
+
+   // move front forward (wrap) 
+   iaFront = (iaFront + 1) % (numBlocks * numCells);
+
+   // now check if old block is still used
+   bool blockStillUsed = false;
+   for (size_t i = 0; i < numElements; i++)
+   {
+      if (ibFromID((int)i) == ib)
+      {
+         blockStillUsed = true;
+         break;
+      }
+   }
+
+   if (!blockStillUsed)
+   {
+      alloc.deallocate(data[ib], numCells);
+      data[ib] = nullptr;
+   }
 }
 
 /*****************************************
@@ -386,6 +526,42 @@ void deque <T, A> :: pop_front()
 template <typename T, typename A>
 void deque <T, A> ::pop_back()
 {
+   assert(numElements > 0);
+
+   int id = (int)numElements - 1;
+   int ib = ibFromID(id);
+   int ic = icFromID(id);
+
+   // destroy back element
+   alloc.destroy(&data[ib][ic]);
+
+   numElements--;
+
+   // CASE: last element removed
+   if (numElements == 0)
+   {
+      alloc.deallocate(data[ib], numCells);
+      data[ib] = nullptr;
+      iaFront = 0;
+      return;
+   }
+
+   // check if block is now empty
+   bool blockStillUsed = false;
+   for (size_t i = 0; i < numElements; i++)
+   {
+      if (ibFromID((int)i) == ib)
+      {
+         blockStillUsed = true;
+         break;
+      }
+   }
+
+   if (!blockStillUsed)
+   {
+      alloc.deallocate(data[ib], numCells);
+      data[ib] = nullptr;
+   }
 }
 
 /*****************************************
