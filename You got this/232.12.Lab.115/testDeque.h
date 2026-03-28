@@ -89,17 +89,17 @@ public:
 //      test_subscript_writeWrapped();
 
       // Insert
-//      test_pushback_empty();
-//      test_pushback_roomNoWrap();
-//      test_pushback_newBlock();
-//      test_pushback_wrap();
-//      test_pushback_complex();
+      test_pushback_empty();
+      test_pushback_roomNoWrap();
+      test_pushback_newBlock();
+      test_pushback_wrap();
+      test_pushback_complex();
       test_pushfront_empty();
-//      test_pushfront_roomNoWrap();
-//      test_pushfront_newBlock();
-//      test_pushfront_wrap();
-//      test_pushfront_complex();
-//      test_pushfront_bigWrap();
+      test_pushfront_roomNoWrap();
+      test_pushfront_newBlock();
+      test_pushfront_wrap();
+      test_pushfront_complex();
+      test_pushfront_bigWrap();
 
       // Remove
 //      test_clear_empty();
@@ -1943,6 +1943,9 @@ public:
       //                      +----+----+
       //                      |    |    |
       //                      +----+----+
+      std::cout << "iaFront: " << d.iaFront << std::endl;
+      std::cout << "numBlocks: " << d.numBlocks << std::endl;
+      std::cout << "data[1]: " << d.data[1] << std::endl;
       assertUnit(d.numElements == 3);
       assertUnit(d.iaFront == 7);
       assertUnit(d.numBlocks == 2);
