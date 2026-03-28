@@ -369,15 +369,19 @@ void deque <T, A> ::push_back(const T& t)
 template <typename T, typename A>
 void deque <T, A> ::push_back(T && t)
 {
+   // Check if there's a need to reallocate
    if (numElements + iaFront >= numBlocks * numCells)
       reallocate((numBlocks == 0) ? 1 : numBlocks * 2);
 
+   // Set the IB and IC
    int ib = ibFromID((int)numElements);
    int ic = icFromID((int)numElements);
 
+   // Checks and responds to not enough blocks
    if (data[ib] == nullptr)
       data[ib] = alloc.allocate(numCells);
 
+   // Creates the new element, and adds to the total
    alloc.construct(&data[ib][ic], std::move(t));
    numElements++;
 }
@@ -408,6 +412,7 @@ void deque <T, A> ::push_front(const T& t)
    if (data[ib] == nullptr)
       data[ib] = alloc.allocate(numCells);
    
+   // Creates the new element, and adds to the total
    alloc.construct(&data[ib][ic], t);
    numElements++;
 }
@@ -438,6 +443,7 @@ void deque <T, A> ::push_front(T&& t)
    if (data[ib] == nullptr)
       data[ib] = alloc.allocate(numCells);
 
+   // Creates the new element, and adds to the total
    alloc.construct(&data[ib][ic], std::move(t));
    numElements++;
 }
@@ -452,6 +458,7 @@ void deque <T, A> ::clear()
    // destroy all elements
    for (size_t i = 0; i < numElements; i++)
    {
+    // step by step throughout the Deque
       int ib = ibFromID((int)i);
       int ic = icFromID((int)i);
 
@@ -468,6 +475,7 @@ void deque <T, A> ::clear()
       }
    }
 
+   // sets apropriate member variables
    numElements = 0;
    iaFront = 0;
 }
@@ -526,8 +534,10 @@ void deque <T, A> ::pop_front()
 template <typename T, typename A>
 void deque <T, A> ::pop_back()
 {
+   // Can't be an empty Deque
    assert(numElements > 0);
 
+   // Go to the last element in the Deque
    int id = (int)numElements - 1;
    int ib = ibFromID(id);
    int ic = icFromID(id);
