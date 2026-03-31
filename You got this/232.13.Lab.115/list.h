@@ -14,7 +14,7 @@
  *        List         : A class that represents a List
  *        ListIterator : An iterator through List
  * Author
- *    <your names here>
+ *    Katy's Favorites! Mike, Hayley, and Jackson
  ************************************************************************/
 
 #pragma once
@@ -24,7 +24,7 @@
 #include <memory>      // for std::allocator
 
 class TestList; // forward declaration for unit tests
-class TestHash;
+class TestHash; // forward declaration for hash used later
 
 namespace custom
 {
@@ -45,33 +45,51 @@ public:
    // Construct
    //
    
-   list(const A& a = A())  
+   list(const A& a = A())
    {
-      numElements = 99;
-      pHead = pTail = new list <T, A> ::Node();
+      numElements = 0;
+      pHead = pTail = nullptr;
    }
    list(list <T, A> & rhs, const A& a = A())
    {
-      numElements = 99;
-      pHead = pTail = new list <T, A> ::Node();
+      numElements = 0;
+      pHead = pTail = nullptr;
+      
+      if (rhs.pHead == nullptr)
+         return;
+      
+      for (Node * p = rhs.pHead; p; p = p->pNext)
+      {
+         push_back(p->data);
+      }
    }
    list(list <T, A>&& rhs, const A& a = A());
    list(size_t num, const T & t, const A& a = A());
    list(size_t num, const A& a = A());
-   list(const std::initializer_list<T>& il, const A& a = A()) 
+   list(const std::initializer_list<T>& il, const A& a = A())
    {
-      numElements = 99;
-      pHead = pTail = new list <T, A> ::Node();
+      numElements = 0;
+      pHead = pTail = nullptr;
+      
+      for (auto it = il.begin(); it != il.end(); it++)
+      {
+         push_back(*it);
+      }
    }
    template <class Iterator>
    list(Iterator first, Iterator last, const A& a = A())
    {
-      numElements = 99;
-      pHead = pTail = new list <T, A> ::Node();
+      numElements = 0;
+      pHead = pTail = nullptr;
+      
+      for (auto it = first; it != last; it++)
+      {
+         push_back(*it);
+      }
    }
    ~list()
-   { 
-
+   {
+      clear();
    }
    
    //
@@ -81,6 +99,20 @@ public:
    list <T, A> & operator = (list <T, A> &  rhs);
    list <T, A> & operator = (list <T, A> && rhs);
    list <T, A> & operator = (const std::initializer_list<T>& il);
+   void swap(list <T, A>& rhs)
+   {
+      Node* tempHead = rhs.pHead;
+      rhs.pHead = pHead;
+      pHead = tempHead;
+
+      Node* tempTail = rhs.pTail;
+      rhs.pTail = pTail;
+      pTail = tempTail;
+
+      size_t tempNum = rhs.numElements;
+      rhs.numElements = numElements;
+      numElements = tempNum;
+   }
 
    //
    // Iterator
@@ -122,8 +154,8 @@ public:
    // Status
    //
    
-   bool empty()  const { return true; }
-   size_t size() const { return 98;   }
+   bool empty()  const { return numElements == 0; }
+   size_t size() const { return numElements;   }
 
 private:
    // nested linked list class
@@ -152,15 +184,13 @@ public:
    //
    Node()
    {
-      pNext = pPrev = this;
+      pPrev = pPrev = nullptr;
    }
-   Node(const T& data)
+   Node(const T& data) : data(data), pNext(nullptr), pPrev(nullptr)
    {
-      pNext = pPrev = this;
    }
-   Node(T&& data)
+   Node(T&& data) : data(std::move(data)), pNext(nullptr), pPrev(nullptr)
    {
-      pNext = pPrev = this;
    }
 
    //
@@ -177,74 +207,77 @@ public:
  * Iterate through a List, non-constant version
  ************************************************/
 template <typename T, typename A>
-class list <T, A> :: iterator
+class list <T, A> ::iterator
 {
    friend class ::TestList; // give unit tests access to the privates
    friend class ::TestHash;
    template <typename TT, typename AA>
    friend class custom::list;
-   
+
 public:
    // constructors, destructors, and assignment operator
-   iterator()  
+   iterator() : p(nullptr) {}
+
+   iterator(Node* pRHS) : p(pRHS) {}
+
+   iterator(const iterator& rhs) : p(rhs.p) {}
+
+   iterator& operator = (const iterator& rhs)
    {
-      p = new list <T, A> ::Node;
-   }
-   iterator(Node * pRHS)
-   {
-      p = new list <T, A> ::Node;
-   }
-   iterator(const iterator  & rhs) 
-   {
-      p = new list <T, A> ::Node;
-   }
-   iterator & operator = (const iterator & rhs)
-   {
+      p = rhs.p;
       return *this;
    }
-   
+
    // equals, not equals operator
-   bool operator == (const iterator & rhs) const { return true; }
-   bool operator != (const iterator & rhs) const { return true; }
+   bool operator == (const iterator& rhs) const { return p == rhs.p; }
+   bool operator != (const iterator& rhs) const { return p != rhs.p; }
 
    // dereference operator, fetch a node
-   T & operator * ()
+   T& operator * ()
    {
-      return *(new T);
+      return p->data;
    }
 
    // postfix increment
    iterator operator ++ (int postfix)
    {
-      return *this;
+      iterator temp = *this;
+      ++(*this);
+      return temp;
    }
 
    // prefix increment
-   iterator & operator ++ ()
+   iterator& operator ++ ()
    {
+      if (p)
+         p = p->pNext;
       return *this;
    }
-   
+
    // postfix decrement
    iterator operator -- (int postfix)
    {
-      return *this;
+      iterator temp = *this;
+      --(*this);
+      return temp;
    }
 
    // prefix decrement
-   iterator & operator -- ()
+   iterator& operator -- ()
    {
+      if (p)
+         p = p->pPrev;
       return *this;
-   } 
+   }
 
    // two friends who need to access p directly
-   friend iterator list <T, A> :: insert(iterator it, const T &  data);
-   friend iterator list <T, A> :: insert(iterator it,       T && data);
-   friend iterator list <T, A> :: erase(const iterator & it);
+   friend iterator list <T, A> ::insert(iterator it, const T& data);
+   friend iterator list <T, A> ::insert(iterator it, T&& data);
+   friend iterator list <T, A> ::erase(const iterator& it);
 
 private:
 
-   typename list <T, A> :: Node * p;
+   typename list <T, A> ::Node* p;
 };
 
 /*****************************************
@@ -252,10 +285,30 @@ private:
  * Create a list initialized to a value
  ****************************************/
 template <typename T, typename A>
-list <T, A> ::list(size_t num, const T & t, const A& a) 
+list <T, A> ::list(size_t num, const T& t, const A& a)
 {
-   numElements = 99;
-   pHead = pTail = new list <T, A> ::Node();
+   numElements = 0;
+   pHead = pTail = nullptr;
+   
+   if (num == 0)
+      return;
+   
+   pHead = new Node(t);
+   pHead->pPrev = nullptr;
+   pHead->pNext = nullptr;
+   pTail = pHead;
+   numElements = 1;
+
+   for (size_t i = 1; i < num; ++i)
+   {
+      Node * pNew = new Node(t);
+      pNew->pPrev = pTail;
+      pNew->pNext = nullptr;
+      pTail->pNext = pNew;
+      pTail = pNew;
+      ++numElements;
+   }
+   
 }
 
 /*****************************************
@@ -263,11 +316,30 @@ list <T, A> ::list(size_t num, const T & t, const A& a)
  * Create a list initialized to a value
  ****************************************/
 template <typename T, typename A>
-list <T, A> ::list(size_t num, const A& a) 
+list <T, A> ::list(size_t num, const A& a)
 {
-   numElements = 99;
-   pHead = pTail = new list <T, A> ::Node();
+   numElements = 0;
+   pHead = pTail = nullptr;
+   
+   if (num == 0)
+      return;
+   
+   pHead = new Node();
+   pHead->pPrev = nullptr;
+   pHead->pNext = nullptr;
+   pTail = pHead;
+   numElements = 1;
 
+   for (size_t i = 1; i < num; ++i)
+   {
+      Node * pNew = new Node();
+      pNew->pPrev = pTail;
+      pNew->pNext = nullptr;
+      pTail->pNext = pNew;
+      pTail = pNew;
+      ++numElements;
+   }
+   
 }
 
 /*****************************************
@@ -287,11 +359,21 @@ list <T, A> ::list(list <T, A>&& rhs, const A& a) :
  * Copy one list onto another
  *     INPUT  : a list to be moved
  *     OUTPUT :
- *     COST   : O(n) with respect to the size of the LHS 
+ *     COST   : O(n) with respect to the size of the LHS
  *********************************************/
 template <typename T, typename A>
-list <T, A>& list <T, A> :: operator = (list <T, A> && rhs)
+list <T, A>& list <T, A> :: operator = (list <T, A>&& rhs)
 {
+   if (this != &rhs)
+   {
+      clear();
+      pHead = rhs.pHead;
+      pTail = rhs.pTail;
+      numElements = rhs.numElements;
+
+      rhs.pHead = rhs.pTail = nullptr;
+      rhs.numElements = 0;
+   }
    return *this;
 }
 
@@ -303,8 +385,45 @@ list <T, A>& list <T, A> :: operator = (list <T, A> && rhs)
  *     COST   : O(n) with respect to the number of nodes
  *********************************************/
 template <typename T, typename A>
-list <T, A> & list <T, A> :: operator = (list <T, A> & rhs)
+list <T, A>& list <T, A> :: operator = (list <T, A>& rhs)
 {
+   auto itRHS = rhs.begin();
+   auto itLHS = begin();
+   
+   while (itRHS != rhs.end() && itLHS != end())
+   {
+      *itLHS = *itRHS;
+      ++itRHS;
+      ++itLHS;
+   }
+   
+   if (itRHS != rhs.end())
+   {
+      while (itRHS != rhs.end())
+      {
+         push_back(*itRHS);
+         ++itRHS;
+      }
+   }
+   
+   else if (rhs.empty())
+      clear();
+      
+   else if (itLHS != end())
+   {
+      Node * p = itLHS.p;
+      pTail = p->pPrev;
+      Node * pNext = p->pNext;
+      while (p)
+      {
+         pNext = p->pNext;
+         delete(p);
+         p = pNext;
+         numElements--;
+      }
+      pTail->pNext = nullptr;
+   }
+
    return *this;
 }
 
@@ -318,7 +437,42 @@ list <T, A> & list <T, A> :: operator = (list <T, A> & rhs)
 template <typename T, typename A>
 list <T, A>& list <T, A> :: operator = (const std::initializer_list<T>& rhs)
 {
+   auto itRHS = rhs.begin();
+   auto itLHS = begin();
+   
+   while (itRHS != rhs.end() && itLHS != end())
+   {
+      *itLHS = *itRHS;
+      ++itRHS;
+      ++itLHS;
+   }
+   
+   if (itRHS != rhs.end())
+   {
+      while (itRHS != rhs.end())
+      {
+         push_back(*itRHS);
+         ++itRHS;
+      }
+   }
+      
+   else if (itLHS != end())
+   {
+      Node * p = itLHS.p;
+      pTail = p->pPrev;
+      Node * pNext = p->pNext;
+      while (p)
+      {
+         pNext = p->pNext;
+         delete(p);
+         p = pNext;
+         numElements--;
+      }
+      pTail->pNext = nullptr;
+   }
+
    return *this;
+
 }
 
 /**********************************************
@@ -329,9 +483,17 @@ list <T, A>& list <T, A> :: operator = (const std::initializer_list<T>& rhs)
  *     COST   : O(n) with respect to the number of nodes
  *********************************************/
 template <typename T, typename A>
-void list <T, A> :: clear()
+void list <T, A> ::clear()
 {
+   while (pHead)
+   {
+      Node* pDelete = pHead;
+      pHead = pHead->pNext;
+      delete pDelete;
+   }
 
+   pTail = nullptr;
+   numElements = 0;
 }
 
 /*********************************************
@@ -342,15 +504,37 @@ void list <T, A> :: clear()
  *    COST   : O(1)
  *********************************************/
 template <typename T, typename A>
-void list <T, A> :: push_back(const T & data)
+void list <T, A> ::push_back(const T& data)
 {
+   Node* pNew = new Node(data);   // COPY constructor happens here
 
+   pNew->pNext = nullptr;
+   pNew->pPrev = pTail;
+
+   if (pTail)
+      pTail->pNext = pNew;
+   else
+      pHead = pNew;              // first node
+
+   pTail = pNew;
+   ++numElements;
 }
 
 template <typename T, typename A>
-void list <T, A> ::push_back(T && data)
+void list <T, A> ::push_back(T&& data)
 {
+   Node* pNew = new Node(std::move(data));
 
+   pNew->pNext = nullptr;
+   pNew->pPrev = pTail;
+
+   if (pTail)
+      pTail->pNext = pNew;
+   else
+      pHead = pNew;
+
+   pTail = pNew;
+   ++numElements;
 }
 
 /*********************************************
@@ -361,29 +545,62 @@ void list <T, A> ::push_back(T && data)
  *     COST   : O(1)
  *********************************************/
 template <typename T, typename A>
-void list <T, A> :: push_front(const T & data)
+void list <T, A> ::push_front(const T& data)
 {
+   Node* pNew = new Node(data);
 
+   pNew->pPrev = nullptr;
+   pNew->pNext = pHead;
+
+   if (pHead)
+      pHead->pPrev = pNew;
+   else
+      pTail = pNew;
+
+   pHead = pNew;
+   ++numElements;
 }
 
 template <typename T, typename A>
-void list <T, A> ::push_front(T && data)
+void list <T, A> ::push_front(T&& data)
 {
+   Node* pNew = new Node(std::move(data));
 
+   pNew->pPrev = nullptr;
+   pNew->pNext = pHead;
+
+   if (pHead)
+      pHead->pPrev = pNew;
+   else
+      pTail = pNew;
+
+   pHead = pNew;
+   ++numElements;
 }
 
 
 /*********************************************
  * LIST :: POP BACK
  * remove an item from the end of the list
- *    INPUT  : 
+ *    INPUT  :
  *    OUTPUT :
  *    COST   : O(1)
  *********************************************/
 template <typename T, typename A>
 void list <T, A> ::pop_back()
 {
+   if (!pTail) return;
 
+   Node* pDelete = pTail;
+   pTail = pTail->pPrev;
+
+   if (pTail)
+      pTail->pNext = nullptr;
+   else
+      pHead = nullptr;
+
+   delete pDelete;
+   --numElements;
 }
 
 /*********************************************
@@ -396,33 +613,52 @@ void list <T, A> ::pop_back()
 template <typename T, typename A>
 void list <T, A> ::pop_front()
 {
+   if (!pHead) return;
 
+   Node* pDelete = pHead;
+   pHead = pHead->pNext;
+
+   if (pHead)
+      pHead->pPrev = nullptr;
+   else
+      pTail = nullptr;
+
+   delete pDelete;
+   --numElements;
 }
 
 /*********************************************
  * LIST :: FRONT
  * retrieves the first element in the list
- *     INPUT  : 
+ *     INPUT  :
  *     OUTPUT : data to be displayed
  *     COST   : O(1)
  *********************************************/
 template <typename T, typename A>
-T & list <T, A> :: front()
+T& list <T, A> ::front()
 {
-   return *(new T);
+   if (!empty())
+   {
+      return pHead->data;
+   }
+   throw "ERROR: unable to access data from an empty list";
 }
 
 /*********************************************
  * LIST :: BACK
  * retrieves the last element in the list
- *     INPUT  : 
+ *     INPUT  :
  *     OUTPUT : data to be displayed
  *     COST   : O(1)
  *********************************************/
 template <typename T, typename A>
-T & list <T, A> :: back()
+T& list <T, A> ::back()
 {
-   return *(new T);
+   if (!empty())
+   {
+      return pTail->data;
+   }
+   throw "ERROR: unable to access data from an empty list";
 }
 
 
@@ -430,14 +666,54 @@ T & list <T, A> :: back()
  * LIST :: REMOVE
  * remove an item from the middle of the list
  *     INPUT  : an iterator to the item being removed
- *     OUTPUT : iterator to the new location 
+ *     OUTPUT : iterator to the new location
  *     COST   : O(1)
  ******************************************/
 template <typename T, typename A>
-typename list <T, A> :: iterator  list <T, A> :: erase(const list <T, A> :: iterator & it)
+typename list <T, A> ::iterator  list <T, A> ::erase(const list <T, A> ::iterator& it)
 {
-   return end();
+   if (empty())
+   {
+      return it;
+   }
+   if (it.p->pNext == nullptr && it.p->pPrev == nullptr)
+   {
+      clear();
+      return it;
+   }
+   iterator itNext = end();
+
+   if (it.p->pNext)
+   {
+      it.p->pNext->pPrev = it.p->pPrev;
+      itNext = iterator(it.p->pNext);
+   }
+   else
+   {
+      if (pTail->pPrev)
+      {
+         pTail = pTail->pPrev;
+         pTail->pNext = nullptr;
+      }
+   }
+   if (it.p->pPrev)
+   {
+      it.p->pPrev->pNext = it.p->pNext;
+   }
+   else
+   {
+      if (pHead->pNext)
+      {
+         pHead = pHead->pNext;
+         pHead->pPrev = nullptr;
+      }
+
+   }
+   delete it.p;
+   numElements--;
+   return itNext;
 }
+
 
 /******************************************
  * LIST :: INSERT
@@ -448,10 +724,49 @@ typename list <T, A> :: iterator  list <T, A> :: erase(const list <T, A> :: iter
  *     COST   : O(1)
  ******************************************/
 template <typename T, typename A>
-typename list <T, A> :: iterator list <T, A> :: insert(list <T, A> :: iterator it,
-                                                 const T & data) 
+typename list <T, A> ::iterator list <T, A> ::insert(list <T, A> ::iterator it,
+   const T& data)
 {
-   return end();
+   if (empty())
+   {
+      pHead = pTail = new Node(data);
+      numElements = 1;
+      return begin();
+   }
+   
+   if (it == end())
+   {
+      Node* pNew = new Node(data);
+      pNew->pPrev = pTail;
+      pTail->pNext = pNew;
+      pTail = pNew;
+      numElements++;
+      return iterator(pNew);
+   }
+   
+   if (it == begin())
+   {
+      // insert at beginning of the list
+      push_front(data);
+      return begin();
+   }
+   
+   Node* pNew = new Node(data);
+   pNew->pPrev = it.p->pPrev;
+   pNew->pNext = it.p;
+   
+   if (pNew->pPrev)
+      pNew->pPrev->pNext = pNew;
+   else
+      pHead = pNew;
+   
+   if (pNew->pNext)
+      pNew->pNext->pPrev = pNew;
+   else
+      pTail = pNew;
+   
+   numElements++;
+   return iterator(pNew);
 }
 
 
@@ -465,9 +780,48 @@ typename list <T, A> :: iterator list <T, A> :: insert(list <T, A> :: iterator i
  ******************************************/
 template <typename T, typename A>
 typename list <T, A> ::iterator list <T, A> ::insert(list <T, A> ::iterator it,
-   T && data)
+   T&& data)
 {
-   return end();
+   if (empty())
+   {
+      pHead = pTail = new Node(std::move(data));
+      numElements = 1;
+      return begin();
+   }
+   
+   if (it == end())
+   {
+      Node* pNew = new Node(std::move(data));
+      pNew->pPrev = pTail;
+      pTail->pNext = pNew;
+      pTail = pNew;
+      numElements++;
+      return iterator(pNew);
+   }
+   
+   if (it == begin())
+   {
+      // insert at beginning of the list
+      push_front(std::move(data));
+      return begin();
+   }
+   
+   Node* pNew = new Node(std::move(data));
+   pNew->pPrev = it.p->pPrev;
+   pNew->pNext = it.p;
+   
+   if (pNew->pPrev)
+      pNew->pPrev->pNext = pNew;
+   else
+      pHead = pNew;
+   
+   if (pNew->pNext)
+      pNew->pNext->pPrev = pNew;
+   else
+      pTail = pNew;
+   
+   numElements++;
+   return iterator(pNew);
 }
 
 /**********************************************
@@ -478,9 +832,11 @@ typename list <T, A> ::iterator list <T, A> ::insert(list <T, A> ::iterator it,
  *     COST   : O(n) with respect to the size of the LHS
  *********************************************/
 template <typename T, typename A>
-void swap(list <T, A> & lhs, list <T, A> & rhs)
+void swap(list <T, A>& lhs, list <T, A>& rhs)
 {
-
+   std::swap(lhs.pHead, rhs.pHead);
+   std::swap(lhs.pTail, rhs.pTail);
+   std::swap(lhs.numElements, rhs.numElements);
 }
 
 }; // namespace custom

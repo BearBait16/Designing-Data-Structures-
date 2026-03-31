@@ -14,14 +14,15 @@
  *        vector                 : A class that represents a Vector
  *        vector::iterator       : An iterator through Vector
  * Author
- *    <your names here>
+ *    Katy's Favourites
  ************************************************************************/
 
 #pragma once
 
-#include <cassert>  // because I am paranoid
-#include <new>      // std::bad_alloc
-#include <memory>   // for std::allocator
+#include <cassert>           // because I am paranoid
+#include <new>               // std::bad_alloc
+#include <memory>            // for std::allocator
+#include <initializer_list>  // for the initializer list, of course!
 
 class TestVector; // forward declaration for unit tests
 class TestStack;
@@ -47,7 +48,8 @@ public:
    //
    // Construct
    //
-   vector(const A & a = A());
+
+   vector(                                   const A & a = A());
    vector(size_t numElements,                const A & a = A());
    vector(size_t numElements, const T & t,   const A & a = A());
    vector(const std::initializer_list<T>& l, const A & a = A());
@@ -60,22 +62,19 @@ public:
    //
    void swap(vector& rhs)
    {
+      std::swap(data, rhs.data);
+      std::swap(numElements, rhs.numElements);
+      std::swap(numCapacity, rhs.numCapacity);
    }
-   vector & operator = (const vector & rhs);
+   vector& operator = (const vector& rhs);
    vector & operator = (vector&& rhs);
 
    //
    // Iterator
    //
    class iterator;
-   iterator begin() 
-   { 
-      return iterator(); 
-   }
-   iterator end() 
-   { 
-      return iterator(); 
-   }
+   iterator begin() { return iterator(data); }
+   iterator end()   { return iterator(data + numElements); }
 
    //
    // Access
@@ -101,22 +100,31 @@ public:
    //
    void clear()
    {
+      for (auto i = 0; i < numElements; i++)
+      {
+         std::allocator_traits<decltype(alloc)>::destroy(alloc, &data[i]);
+      }
+      numElements = 0;
    }
    void pop_back()
    {
+      if (numElements)
+      {
+         std::allocator_traits<decltype(alloc)>::destroy(alloc, &data[--numElements]);
+      }
    }
    void shrink_to_fit();
 
    //
    // Status
    //
-   size_t  size()          const { return 999;}
-   size_t  capacity()      const { return 999;}
-   bool empty()            const { return true;}
+   size_t  size()          const { return numElements;}
+   size_t  capacity()      const { return numCapacity;}
+   bool empty()            const { return numElements == 0;}
   
 private:
    
-   A    alloc;                // use alloacator for memory allocation
+   A    alloc;                // use allocator for memory allocation
    T *  data;                 // user data, a dynamically-allocated array
    size_t  numCapacity;       // the capacity of the array
    size_t  numElements;       // the number of items currently used
@@ -142,47 +150,57 @@ class vector <T, A> ::iterator
    friend class ::TestHash;
 public:
    // constructors, destructors, and assignment operator
-   iterator()                           {  }
-   iterator(T* p)                       {  }
-   iterator(const iterator& rhs)        {  }
-   iterator(size_t index, vector<T>& v) {  }
+   iterator()                       { p = nullptr; }
+   iterator(T* p)                   { this->p = p; }
+   iterator(const iterator& rhs)    { *this = rhs; }
+   iterator(size_t index, vector<T>& v) { p = v.data + index; }
    iterator& operator = (const iterator& rhs)
    {
+      this->p = rhs.p;
       return *this;
    }
 
    // equals, not equals operator
-   bool operator != (const iterator& rhs) const { return true; }
-   bool operator == (const iterator& rhs) const { return true; }
+   bool operator != (const iterator& rhs) const { return rhs.p != this->p; }
+   bool operator == (const iterator& rhs) const { return rhs.p == this->p; }
 
    // dereference operator
    T& operator * ()
    {
-      return *(new T);
+      if (p)
+         return *p;
+      else
+         throw "ERROR: Trying to dereference a null pointer";
    }
 
    // prefix increment
    iterator& operator ++ ()
    {
+      p++;
       return *this;
    }
 
    // postfix increment
    iterator operator ++ (int postfix)
    {
-      return *this;
+      iterator temp(*this);
+      p++;
+      return temp;
    }
 
    // prefix decrement
    iterator& operator -- ()
    {
+      --p;
       return *this;
    }
 
    // postfix decrement
    iterator operator -- (int postfix)
    {
-      return *this;
+      iterator temp(*this);
+      p--;
+      return temp;
    }
 
 private:
@@ -196,13 +214,8 @@ private:
  * construct each element, and copy the values over
  ****************************************/
 template <typename T, typename A>
-vector <T, A> :: vector(const A & a)
-{
-   data = new T[100];
-   numElements = 19;
-   numCapacity = 29;
-}
-
+vector <T, A> :: vector(const A & a) :
+   data(nullptr), numElements(0), numCapacity(0), alloc(a) {}
 
 /*****************************************
  * VECTOR :: NON-DEFAULT constructors
@@ -210,11 +223,19 @@ vector <T, A> :: vector(const A & a)
  * construct each element, and copy the values over
  ****************************************/
 template <typename T, typename A>
-vector <T, A> :: vector(size_t num, const T & t, const A & a) 
+vector <T, A> :: vector(size_t num, const T & t, const A & a) :
+   data(nullptr), numElements(0), numCapacity(0), alloc(a)
 {
-   data = new T[100];
-   numElements = 19;
-   numCapacity = 29;
+   if (num > 0)
+   {
+      // allocate
+      data = std::allocator_traits<decltype(alloc)>::allocate(alloc, num);
+      numCapacity = num;
+      
+      // copy
+      std::uninitialized_fill_n(data, num, t);
+      numElements = num;
+   }
 }
 
 /*****************************************
@@ -222,11 +243,25 @@ vector <T, A> :: vector(size_t num, const T & t, const A & a)
  * Create a vector with an initialization list.
  ****************************************/
 template <typename T, typename A>
-vector <T, A> :: vector(const std::initializer_list<T> & l, const A & a) 
+vector <T, A> :: vector(const std::initializer_list<T> & l, const A & a)  :
+   data(nullptr), numElements(0), numCapacity(0), alloc(a)
 {
-   data = new T[100];
-   numElements = 19;
-   numCapacity = 29;
+      if (l.size())
+      {
+         
+         // store allocator
+         data = std::allocator_traits<decltype(alloc)>::allocate(alloc, l.size());
+         numCapacity = l.size();
+         
+         // add each to list
+         int i = 0;
+         for (auto it = l.begin(); it != l.end(); ++it)
+         {
+            std::allocator_traits<decltype(alloc)>::construct(alloc, &data[i++], *it);
+         }
+         assert(i == l.size());
+         numElements = l.size();
+      }
 }
 
 /*****************************************
@@ -235,11 +270,20 @@ vector <T, A> :: vector(const std::initializer_list<T> & l, const A & a)
  * construct each element, and copy the values over
  ****************************************/
 template <typename T, typename A>
-vector <T, A> :: vector(size_t num, const A & a) 
+vector <T, A> :: vector(size_t num, const A & a) :
+   data(nullptr), numElements(0), numCapacity(0), alloc(a)
 {
-   data = new T[100];
-   numElements = 19;
-   numCapacity = 29;
+      if (num > 0)
+      {
+         data = std::allocator_traits<decltype(alloc)>::allocate(alloc, num);
+         numCapacity = num;
+         
+         for (size_t i = 0; i < num; ++i)
+         {
+            std::allocator_traits<decltype(alloc)>::construct(alloc, &data[i]);
+         }
+         numElements = num;
+      }
 }
 
 /*****************************************
@@ -248,11 +292,11 @@ vector <T, A> :: vector(size_t num, const A & a)
  * call the copy constructor on each element
  ****************************************/
 template <typename T, typename A>
-vector <T, A> :: vector (const vector & rhs) 
+vector <T, A> :: vector (const vector & rhs) :
+      data(nullptr), numElements(0), numCapacity(0), alloc(rhs.alloc)
 {
-   data = new T[100];
-   numElements = 19;
-   numCapacity = 29;
+         (*this) = rhs;
+
 }
    
 /*****************************************
@@ -260,11 +304,11 @@ vector <T, A> :: vector (const vector & rhs)
  * Steal the values from the RHS and set it to zero.
  ****************************************/
 template <typename T, typename A>
-vector <T, A> :: vector (vector && rhs) 
+vector <T, A> :: vector (vector && rhs) :
+      data(nullptr), numElements(0), numCapacity(0), alloc(rhs.alloc)
 {
-   data = new T[100];
-   numElements = 19;
-   numCapacity = 29;
+         (*this) = std::move(rhs);
+   
 }
 
 /*****************************************
@@ -275,6 +319,13 @@ vector <T, A> :: vector (vector && rhs)
 template <typename T, typename A>
 vector <T, A> :: ~vector()
 {
+   if (numCapacity != 0)
+   {
+      assert(nullptr != data);
+      for (size_t i = 0; i < numElements; i++)
+         std::allocator_traits<decltype(alloc)>::destroy(alloc, &data[i]);
+      std::allocator_traits<decltype(alloc)>::deallocate(alloc, data, numCapacity);
+   }
 }
 
 /***************************************
@@ -287,13 +338,53 @@ vector <T, A> :: ~vector()
 template <typename T, typename A>
 void vector <T, A> :: resize(size_t newElements)
 {
-   numElements = 3;
+   assert(newElements >= 0);
+   
+   if (newElements < numElements)
+   {
+      for (auto i = newElements; i < numElements; i++)
+      {
+         std::allocator_traits<decltype(alloc)>::destroy(alloc, &data[i]);
+      }
+   }
+   
+   else if (newElements > numElements)
+   {
+      if (newElements > numCapacity)
+         reserve(newElements);
+      for (auto i = numElements; i < newElements; i++)
+      {
+         std::allocator_traits<decltype(alloc)>::construct(alloc, &data[i]);
+      }
+   }
+   
+   numElements = newElements;
 }
 
 template <typename T, typename A>
 void vector <T, A> :: resize(size_t newElements, const T & t)
 {
-   numElements = 3;
+   assert(newElements >= 0);
+   
+   if (newElements < numElements)
+   {
+      for (auto i = newElements; i < numElements; i++)
+      {
+         std::allocator_traits<decltype(alloc)>::destroy(alloc, &data[i]);
+      }
+   }
+   
+   else if (newElements > numElements)
+   {
+      if (newElements > numCapacity)
+         reserve(newElements);
+      for (auto i = numElements; i < newElements; i++)
+      {
+         std::allocator_traits<decltype(alloc)>::construct(alloc, &data[i], t);
+      }
+   }
+   
+   numElements = newElements;
 }
 
 /***************************************
@@ -307,7 +398,28 @@ void vector <T, A> :: resize(size_t newElements, const T & t)
 template <typename T, typename A>
 void vector <T, A> :: reserve(size_t newCapacity)
 {
-   numCapacity = 99;
+   if (newCapacity <= numCapacity)
+   {
+      // no need to reserve
+      return;
+   }
+   
+   T * newData = std::allocator_traits<decltype(alloc)>::allocate(alloc, newCapacity);
+   for (auto i = 0; i < numElements; i++)
+   {
+      std::allocator_traits<decltype(alloc)>::construct(alloc, newData + i, std::move(data[i])); // newData[i] <- move_data(data[i])
+   }
+   
+   if (nullptr != data)
+   {
+      for (auto i = 0; i < numElements; i++)
+      {
+         std::allocator_traits<decltype(alloc)>::destroy(alloc, &data[i]); // newData[i] <- move_data(data[i])
+      }
+   }
+   
+   data = newData;
+   numCapacity = newCapacity;
 }
 
 /***************************************
@@ -319,7 +431,27 @@ void vector <T, A> :: reserve(size_t newCapacity)
 template <typename T, typename A>
 void vector <T, A> :: shrink_to_fit()
 {
-    
+   if (numElements == numCapacity)
+   {
+      // no need to fit
+      return;
+   }
+   
+   T* pNew = nullptr;
+   
+   if (numElements != 0)
+   {
+      pNew = std::allocator_traits<decltype(alloc)>::allocate(alloc, numElements);
+      
+      for (size_t i = 0; i < numElements; i++)
+         std::allocator_traits<decltype(alloc)>::construct(alloc, pNew + i, std::move(data[i]));
+      
+   }
+   
+   std::allocator_traits<decltype(alloc)>::deallocate(alloc, data, numCapacity);
+   data = pNew;
+   
+   numCapacity = numElements;
 }
 
 
@@ -331,8 +463,7 @@ void vector <T, A> :: shrink_to_fit()
 template <typename T, typename A>
 T & vector <T, A> :: operator [] (size_t index)
 {
-   return *(new T);
-    
+   return data[index];
 }
 
 /******************************************
@@ -342,7 +473,7 @@ T & vector <T, A> :: operator [] (size_t index)
 template <typename T, typename A>
 const T & vector <T, A> :: operator [] (size_t index) const
 {
-   return *(new T);
+   return data[index];
 }
 
 /*****************************************
@@ -352,7 +483,7 @@ const T & vector <T, A> :: operator [] (size_t index) const
 template <typename T, typename A>
 T & vector <T, A> :: front ()
 {
-   return *(new T);
+   return data[0];
 }
 
 /******************************************
@@ -362,7 +493,7 @@ T & vector <T, A> :: front ()
 template <typename T, typename A>
 const T & vector <T, A> :: front () const
 {
-   return *(new T);
+   return data[0];
 }
 
 /*****************************************
@@ -372,7 +503,7 @@ const T & vector <T, A> :: front () const
 template <typename T, typename A>
 T & vector <T, A> :: back()
 {
-   return *(new T);
+   return data[numElements - 1];
 }
 
 /******************************************
@@ -382,7 +513,7 @@ T & vector <T, A> :: back()
 template <typename T, typename A>
 const T & vector <T, A> :: back() const
 {
-   return *(new T);
+   return data[numElements - 1];
 }
 
 /***************************************
@@ -396,14 +527,25 @@ const T & vector <T, A> :: back() const
 template <typename T, typename A>
 void vector <T, A> :: push_back (const T & t)
 {
-    
+   if (numCapacity == 0)
+      reserve(1);
+   else if (numElements == numCapacity)
+      reserve(numCapacity * 2);
+   
+   std::allocator_traits<decltype(alloc)>::construct(alloc, &data[numElements++], t);
+
 }
 
 template <typename T, typename A>
 void vector <T, A> ::push_back(T && t)
 {
-    
-
+   if (numCapacity == 0)
+      reserve(1);
+   else if (numElements == numCapacity)
+      reserve(numCapacity * 2);
+   
+   std::allocator_traits<decltype(alloc)>::construct(alloc, &data[numElements++], std::move(t));
+   
 }
 
 /***************************************
@@ -416,13 +558,57 @@ void vector <T, A> ::push_back(T && t)
 template <typename T, typename A>
 vector <T, A> & vector <T, A> :: operator = (const vector & rhs)
 {
+   if (rhs.numElements == numElements)
+   {
+      for (size_t i = 0; i < rhs.numElements; i++)
+         data[i] = rhs.data[i];
+   }
+   
+   else if (rhs.numElements > numElements)
+   {
+      if (rhs.numElements <= numCapacity)
+      {
+         for (size_t i = 0; i < numElements; i++)
+         {
+            data[i] = rhs.data[i];
+         }
+         for (size_t i = numElements; i < rhs.numElements; i++)
+            std::allocator_traits<decltype(alloc)>::construct(alloc, &data[i], rhs.data[i]);
+         numElements = rhs.numElements;
+      }
+      else
+      {
+         T * pNew = alloc.allocate(rhs.numElements);
+         
+         for (size_t i = 0; i < rhs.numElements; i++)
+            std::allocator_traits<decltype(alloc)>::construct(alloc, &pNew[i], rhs.data[i]);
+         clear();
+         std::allocator_traits<decltype(alloc)>::deallocate(alloc, data, numCapacity);
+         
+         data = pNew;
+         numElements = rhs.numElements;
+         numCapacity = rhs.numElements;
+      }
+   }
+   
+   else
+   {
+      for (size_t i = 0; i < rhs.numElements; i++)
+         data[i] = rhs.data[i];
+         
+      for (size_t i = rhs.numElements; i < numElements; i++)
+         std::allocator_traits<decltype(alloc)>::destroy(alloc, &data[i]);
+      numElements = rhs.numElements;
+   }
    
    return *this;
 }
 template <typename T, typename A>
 vector <T, A>& vector <T, A> :: operator = (vector&& rhs)
 {
-
+   clear();
+   shrink_to_fit();
+   swap(rhs);
    return *this;
 }
 
