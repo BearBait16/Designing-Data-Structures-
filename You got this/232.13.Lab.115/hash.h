@@ -115,8 +115,17 @@ public:
    class local_iterator;
    iterator begin()
    {
+      //for (auto itBucket = buckets.begin(); itBucket != buckets.end(); itBucket++)
+      //{
+      //   if (itBucket.empty() == false)
+      //   {
+      //      return iterator(buckets.end(), itBucket, itBucket.begin());
+      //   }
+      //}
+      //return end();
       return iterator();
    }
+
    iterator end()
    {
       return iterator();
@@ -154,6 +163,11 @@ public:
    //
    void clear() noexcept
    {
+      for (auto& bucket : buckets)
+      {
+         bucket.clear();
+      }
+      numElements = 0;
    }
    iterator erase(const T& t);
 
@@ -162,30 +176,31 @@ public:
    //
    size_t size() const 
    { 
-      return (size_t)99;
+      return numElements;
    }
    bool empty() const 
    { 
-      return false; 
+      return numElements == 0; 
    }
    size_t bucket_count() const 
    { 
-      return (size_t)99;
+      return buckets.size();
    }
    size_t bucket_size(size_t i) const
    {
-      return (size_t)99;
+      return buckets[i].size();
    }
    float load_factor() const noexcept 
    { 
-      return (float)99.0; 
+      return maxLoadFactor; 
    }
    float max_load_factor() const noexcept 
    { 
-      return (float)99.0; 
+      return maxLoadFactor; 
    }
    void  max_load_factor(float m)
    {
+      maxLoadFactor = m;
    }
 
 private:
@@ -357,6 +372,14 @@ typename unordered_set <T, Hash, E, A> ::iterator unordered_set<T,Hash,E,A>::era
 template <typename T, typename H, typename E, typename A>
 custom::pair<typename custom::unordered_set<T, H, E, A>::iterator, bool> unordered_set<T, H, E, A>::insert(const T& t)
 {
+   //size_t iBucket = bucket(t);
+   //for (auto it = buckets[iBucket].begin(); it == buckets.end(); ++it)
+   //{
+   //   if (*it == t)
+   //   {
+   //      return custom::make_pair(itHash, false);
+   //   }
+   //}
    return custom::pair<custom::unordered_set<T, H, E, A>::iterator, bool>(iterator(), true);
 }
 template <typename T, typename H, typename E, typename A>
@@ -381,6 +404,17 @@ void unordered_set<T, Hash, E, A>::rehash(size_t numBuckets)
 template <typename T, typename H, typename E, typename A>
 typename unordered_set <T, H, E, A> ::iterator unordered_set<T, H, E, A>::find(const T& t)
 {
+   //size_t iBucket = bucket(t);
+   //auto& itList = buckets[iBucket].find(t);
+
+   //if (itList != buckets[iBucket].end())
+   //{
+   //   return iterator(buckets.end(), itVector(buckets, iBucket), itList);
+   //}
+   //else
+   //{
+   //   return end();
+   //}
    return iterator();
 }
 
