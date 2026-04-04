@@ -182,9 +182,8 @@ public:
    //
    // Construct
    //
-   Node()
+   Node() : pNext(nullptr), pPrev(nullptr)
    {
-      pPrev = pPrev = nullptr;
    }
    Node(const T& data) : data(data), pNext(nullptr), pPrev(nullptr)
    {
