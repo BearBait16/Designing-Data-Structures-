@@ -67,9 +67,11 @@ public:
    template <class Iterator>
    unordered_set(Iterator first, Iterator last)
    {
-//      reserve(last - first);
-//      for (auto it = first; it < last; it++)
-//         insert(it);
+      numElements = 0;
+      maxLoadFactor = 1.0;
+      reserve(last - first);
+      for (auto it = first; it < last; it++)
+         insert(*it);
    }
 
    //
@@ -79,16 +81,13 @@ public:
    {
       numElements = rhs.numElements;
       maxLoadFactor = rhs.maxLoadFactor;
-      buckets = rhs.buckets;
+      buckets = std::move(rhs.buckets);
       return *this;
    }
    unordered_set& operator=(unordered_set&& rhs)
    {
-      numElements = rhs.numElements;
-      maxLoadFactor = rhs.maxLoadFactor;
-      buckets = rhs.buckets;
-      
-      rhs.numElements = 0;
+      swap(rhs);
+      rhs.clear();
       rhs.maxLoadFactor = 1.0;
       rhs.buckets.resize(8);
       return *this;
@@ -191,8 +190,11 @@ public:
       return buckets[i].size();
    }
    float load_factor() const noexcept 
-   { 
-      return maxLoadFactor; 
+   {
+      if (buckets.empty())
+         return 0.0f;
+
+      return (float)numElements / (float)buckets.size();
    }
    float max_load_factor() const noexcept 
    { 
@@ -207,7 +209,7 @@ private:
 
    size_t min_buckets_required(size_t num) const
    {
-      return (size_t)99;
+      return (size_t)std::ceil(num / maxLoadFactor);
    }
 
    custom::vector<custom::list<T,A>> buckets;  // each bucket in the hash
@@ -236,8 +238,11 @@ public:
             const typename custom::vector<custom::list<T> >::iterator& itVector,
             const typename custom::list<T>::iterator &itList)
    {
+      this->itVectorEnd = itVectorEnd;
+      this->itVector = itVector;
+      this->itList = itList;
    }
-   iterator(const iterator& rhs) 
+   iterator(const iterator& rhs)
    { 
    }
 
@@ -246,6 +251,9 @@ public:
    //
    iterator& operator = (const iterator& rhs)
    {
+      itVectorEnd = rhs.itVectorEnd;
+      itVector = rhs.itVector;
+      itList = rhs.itList;
       return *this;
    }
 
@@ -315,6 +323,7 @@ public:
    //
    local_iterator& operator = (const local_iterator& rhs)
    {
+      itList = rhs.itList;
       return *this;
    }
 
@@ -323,11 +332,11 @@ public:
    //
    bool operator != (const local_iterator& rhs) const
    {
-      return true;
+      return itList != rhs.itList;
    }
    bool operator == (const local_iterator& rhs) const
    {
-      return true;
+      return itList == rhs.itList;
    }
 
    // 
@@ -372,19 +381,35 @@ typename unordered_set <T, Hash, E, A> ::iterator unordered_set<T,Hash,E,A>::era
 template <typename T, typename H, typename E, typename A>
 custom::pair<typename custom::unordered_set<T, H, E, A>::iterator, bool> unordered_set<T, H, E, A>::insert(const T& t)
 {
-   //size_t iBucket = bucket(t);
-   //for (auto it = buckets[iBucket].begin(); it == buckets.end(); ++it)
-   //{
-   //   if (*it == t)
-   //   {
-   //      return custom::make_pair(itHash, false);
-   //   }
-   //}
+   
+   // find the bucket where the new element is to reside
+   auto iBucket = bucket(t);
+   
+   // see if it is in there already
+   for (auto it = buckets[iBucket].begin(); it != buckets[iBucket].end(); it++)
+   {
+      // if so, return out
+      if (*it == t)
+         return custom::pair<custom::unordered_set<T, H, E, A>::iterator, bool>(iterator(), false);
+   }
+   
+   // reserve more space if we are at the limit
+   if (min_buckets_required(numElements + 1) > bucket_count())
+   {
+      reserve(numElements * 2);
+      iBucket = bucket(t);
+   }
+   
+   // actually insert it now that we can
+   buckets[iBucket].push_back(t);
+   numElements++;
+   
    return custom::pair<custom::unordered_set<T, H, E, A>::iterator, bool>(iterator(), true);
 }
 template <typename T, typename H, typename E, typename A>
 void unordered_set<T, H, E, A>::insert(const std::initializer_list<T> & il)
 {
+   
 }
 
 /*****************************************
